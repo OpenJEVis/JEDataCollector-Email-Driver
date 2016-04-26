@@ -61,11 +61,11 @@ public class MessageFilter {
             JEVisClass channelClass;
             channelClass = channel.getJEVisClass();
 
-            JEVisType senderType = channelClass.getType(DataCollectorTypes.Channel.EMailChannel.SENDER);
+            JEVisType senderType = channelClass.getType(EMailConstants.EMailChannel.SENDER);
             _sender = DatabaseHelper.getObjectAsString(channel, senderType);
-            JEVisType subjectType = channelClass.getType(DataCollectorTypes.Channel.EMailChannel.SUBJECT);
+            JEVisType subjectType = channelClass.getType(EMailConstants.EMailChannel.SUBJECT);
             _subject = DatabaseHelper.getObjectAsString(channel, subjectType);
-            JEVisType readoutType = channelClass.getType(DataCollectorTypes.Channel.EMailChannel.LAST_READOUT);
+            JEVisType readoutType = channelClass.getType(EMailConstants.EMailChannel.LAST_READOUT);
             _lastReadout = DatabaseHelper.getObjectAsDate(channel, readoutType, DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
         } catch (JEVisException ex) {
             Logger.getLogger(MessageFilter.class.getName()).log(Level.SEVERE, "Channel Attribute", ex);

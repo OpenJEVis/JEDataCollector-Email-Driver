@@ -65,6 +65,7 @@ public class EMailDataSource implements DataSource {
 
     private Long _id;
     private String _name; //
+    private EMailConstants.Protocol _protocol;
     private String _userName; //email
     private String _password;
     private String _host;
@@ -84,7 +85,8 @@ public class EMailDataSource implements DataSource {
     private Importer _importer;
     private Parser _parser;
     private List<Result> _result;
-
+    
+    private EMailServerParameters _eMailServerParameters;
     private EMailConnection _eMailConnection;
     private MessageFilter _messageFilter;
 
@@ -179,21 +181,43 @@ public class EMailDataSource implements DataSource {
 
     private void initializeAttributes(JEVisObject mailObject) {
         try {
-            JEVisClass eMailType = mailObject.getDataSource().getJEVisClass(DataCollectorTypes.DataSource.DataServer.EMail.NAME);
-            JEVisType hostType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.HOST);
-            JEVisType connectionTimeoutType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.CONNECTION_TIMEOUT);
-            JEVisType readTimeoutType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.READ_TIMEOUT);
-            JEVisType userType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.USER);
-            JEVisType passwordType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.PASSWORD);
-            JEVisType timezoneType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.TIMEZONE);
-            JEVisType enableType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.ENABLE);
-            JEVisType authenticationType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.AUTHENTICATION);
-            JEVisType sslType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.SSL);
-            JEVisType folderType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.FOLDER);
+//            JEVisClass eMailype = mailObject.getDataSource().getJEVisClass(DataCollectorTypes.DataSource.DataServer.EMail.NAME);        
+//            List<JEVisClass> servertpyes = eMailType.getHeirs();
+//            
+//            JEVisType hostType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.HOST);
+//            JEVisType connectionTimeoutType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.CONNECTION_TIMEOUT);
+//            JEVisType readTimeoutType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.READ_TIMEOUT);
+//            JEVisType userType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.USER);
+//            JEVisType passwordType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.PASSWORD);
+//            JEVisType timezoneType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.TIMEZONE);
+//            JEVisType enable  Type = eMailType.getType(DataCollectorTypes.DataSource.DataServer.ENABLE);
+//            JEVisType authenticationType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.AUTHENTICATION);
+//            JEVisType sslType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.SSL);
+//            JEVisType folderType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.FOLDER);
 
+            _eMailServerParameters = new EMailServerParameters(mailObject);
+            _eMailServerParameters.
+
+            if (mailObject.getJEVisClass().getName().equalsIgnoreCase(EMailConstants.EMail.IMAPEMail.NAME)) {
+                _protocol = EMailConstants.Protocol.imap;
+            } else if (mailObject.getJEVisClass().getName().equalsIgnoreCase(EMailConstants.EMail.POP3EMail.NAME)) {
+                _protocol = EMailConstants.Protocol.pop3;
+            }
+            
             _name = mailObject.getName();
             _id = mailObject.getID();
-            _host = DatabaseHelper.getObjectAsString(mailObject, hostType);
+
+            //in methode packen
+            //start
+            JEVisAttribute hostAtt = mailObject.getAttribute(EMailConstants.EMail.HOST);
+            if (hostAtt == null) {
+                Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Host Attribute is missing");
+            }
+            if (!hostAtt.hasSample()) {
+                Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Waring Host has no samples");
+            }
+            _host = hostAtt.getLatestSample().getValueAsString();
+            //end
 
             _connectionTimeout = DatabaseHelper.getObjectAsInteger(mailObject, connectionTimeoutType);
             _readTimeout = DatabaseHelper.getObjectAsInteger(mailObject, readTimeoutType);
@@ -238,5 +262,20 @@ public class EMailDataSource implements DataSource {
             java.util.logging.Logger.getLogger(EMailDataSource.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
-
+    
+    
+    private void getAttSample(JEVisObject mailObj) throws JEVisException
+    {
+        
+        attName = EMailConstants.EMail.HOST;
+        JEVisAttribute att = mailObj.getAttribute(EMailConstants.EMail.HOST);
+            if (att == null) {
+                Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Host Attribute is missing");
+            }
+            if (!att.hasSample()) {
+                Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Waring Host has no samples");
+            }
+            _host = hostAtt.getLatestSample().getValueAsString();
+    
+    }
 }
