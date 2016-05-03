@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 bi
+ * Copyright (C) 2016 AI
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,27 +27,21 @@ import javax.mail.Store;
 
 /**
  *
- * @author bi
+ * @author Artur Iablokov
  */
 public class EMailConnection {
 
-    private String _name; //
-    private String _userName; // email
-    private String _password;
-    private String _host;
-    private Integer _connectionTimeout;
-    private Integer _readTimeout;
-    private Boolean _enabled;
-    private String _timezone;
+    private final EMailServerParameters _parameters;
     private Store _store;
     private Folder _folder;
     private Session _session;
-
-    public EMailConnection(String host, String userName, String password) {
-        setConnection(host, userName, password);
+    
+    public EMailConnection(EMailServerParameters parameters) {
+        _parameters = parameters;
+        setConnection();
     }
-
-    private void setConnection(String host, String userName, String password) {
+    
+    private void setConnection() {
         try {
             Properties props = new Properties();
             props.put("mail.debug", "true");
@@ -55,7 +49,7 @@ public class EMailConnection {
             //props.;    
             _session = Session.getInstance(props);
             _store = _session.getStore();
-            _store.connect(host, userName, password);
+            _store.connect(_parameters.getHost(), _parameters.getUserEMail(), _parameters.getPassword());
         } catch (NoSuchProviderException ex) {
             Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "EMail Connection failed", ex);
         } catch (MessagingException ex) {

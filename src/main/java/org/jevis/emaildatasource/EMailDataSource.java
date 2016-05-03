@@ -65,17 +65,6 @@ public class EMailDataSource implements DataSource {
 
     private Long _id;
     private String _name; //
-    private EMailConstants.Protocol _protocol;
-    private String _userName; //email
-    private String _password;
-    private String _host;
-    private String _folderName;
-    private Integer _connectionTimeout;
-    private Integer _readTimeout;
-    private Boolean _enabled;
-    private String _timezone;
-    private String _ssl;
-    private String _authentication;
     private List<JEVisObject> _channels;
 
     private Store _store;
@@ -85,7 +74,7 @@ public class EMailDataSource implements DataSource {
     private Importer _importer;
     private Parser _parser;
     private List<Result> _result;
-    
+
     private EMailServerParameters _eMailServerParameters;
     private EMailConnection _eMailConnection;
     private MessageFilter _messageFilter;
@@ -134,7 +123,7 @@ public class EMailDataSource implements DataSource {
     public List<InputStream> sendSampleRequest(JEVisObject channel) {
         List<InputStream> answerList = new ArrayList<InputStream>();
 
-        _eMailConnection = new EMailConnection(_host, _userName, _password);
+        _eMailConnection = new EMailConnection(_eMailServerParameters);
         _messageFilter = new MessageFilter();
         Folder folder = _eMailConnection.getFolder(_folderName);
         _messageFilter.setSearchTerms(channel);
@@ -144,10 +133,10 @@ public class EMailDataSource implements DataSource {
             try {
                 if (message.isMimeType("multipart/mixed")) {
                     Multipart multiPart = (Multipart) message.getContent();
-                    System.out.println("///message-start///");
-                    System.out.println("MESSAGE_FROM!!! " + message.getFrom());
-                    System.out.println("MESSAGE_SUB!!! " + message.getSubject());
-                    System.out.println("MESSAGE_DATE!!! " + message.getReceivedDate());
+//                    System.out.println("///message-start///");
+//                    System.out.println("MESSAGE_FROM!!! " + message.getFrom());
+//                    System.out.println("MESSAGE_SUB!!! " + message.getSubject());
+//                    System.out.println("MESSAGE_DATE!!! " + message.getReceivedDate());
                     // For all multipart contents
                     for (int i = 0; i < multiPart.getCount(); i++) {
                         MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(i);
@@ -181,7 +170,8 @@ public class EMailDataSource implements DataSource {
 
     private void initializeAttributes(JEVisObject mailObject) {
         try {
-//            JEVisClass eMailype = mailObject.getDataSource().getJEVisClass(DataCollectorTypes.DataSource.DataServer.EMail.NAME);        
+            //        try {
+//            JEVisClass eMailype = mailObject.getDataSource().getJEVisClass(DataCollectorTypes.DataSource.DataServer.EMail.NAME);
 //            List<JEVisClass> servertpyes = eMailType.getHeirs();
 //            
 //            JEVisType hostType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.HOST);
@@ -196,57 +186,57 @@ public class EMailDataSource implements DataSource {
 //            JEVisType folderType = eMailType.getType(DataCollectorTypes.DataSource.DataServer.EMail.FOLDER);
 
             _eMailServerParameters = new EMailServerParameters(mailObject);
-            _eMailServerParameters.
 
-            if (mailObject.getJEVisClass().getName().equalsIgnoreCase(EMailConstants.EMail.IMAPEMail.NAME)) {
-                _protocol = EMailConstants.Protocol.imap;
-            } else if (mailObject.getJEVisClass().getName().equalsIgnoreCase(EMailConstants.EMail.POP3EMail.NAME)) {
-                _protocol = EMailConstants.Protocol.pop3;
-            }
-            
-            _name = mailObject.getName();
-            _id = mailObject.getID();
-
-            //in methode packen
-            //start
-            JEVisAttribute hostAtt = mailObject.getAttribute(EMailConstants.EMail.HOST);
-            if (hostAtt == null) {
-                Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Host Attribute is missing");
-            }
-            if (!hostAtt.hasSample()) {
-                Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Waring Host has no samples");
-            }
-            _host = hostAtt.getLatestSample().getValueAsString();
-            //end
-
-            _connectionTimeout = DatabaseHelper.getObjectAsInteger(mailObject, connectionTimeoutType);
-            _readTimeout = DatabaseHelper.getObjectAsInteger(mailObject, readTimeoutType);
-
-            JEVisAttribute userAttr = mailObject.getAttribute(userType);
-            if (!userAttr.hasSample()) {
-                _userName = "";
-            } else {
-                _userName = DatabaseHelper.getObjectAsString(mailObject, userType);
-            }
-
-            JEVisAttribute passAttr = mailObject.getAttribute(passwordType);
-            if (!passAttr.hasSample()) {
-                _password = "";
-            } else {
-                _password = DatabaseHelper.getObjectAsString(mailObject, passwordType);
-            }
-
-            JEVisAttribute folderAttr = mailObject.getAttribute(folderType);
-            if (!passAttr.hasSample()) {
-                _folderName = "INBOX";
-            } else {
-                _folderName = DatabaseHelper.getObjectAsString(mailObject, folderType);
-            }
-            _timezone = DatabaseHelper.getObjectAsString(mailObject, timezoneType);
-            _ssl = DatabaseHelper.getObjectAsString(mailObject, sslType);
-            _authentication = DatabaseHelper.getObjectAsString(mailObject, authenticationType);
-            _enabled = DatabaseHelper.getObjectAsBoolean(mailObject, enableType);
-
+//            if (mailObject.getJEVisClass().getName().equalsIgnoreCase(EMailConstants.EMail.IMAPEMail.NAME)) {
+//                _protocol = EMailConstants.Protocol.imap;
+//            } else if (mailObject.getJEVisClass().getName().equalsIgnoreCase(EMailConstants.EMail.POP3EMail.NAME)) {
+//                _protocol = EMailConstants.Protocol.pop3;
+//            }
+//            
+//            _name = mailObject.getName();
+//            _id = mailObject.getID();
+//
+//            //in methode packen
+//            //start
+//            JEVisAttribute hostAtt = mailObject.getAttribute(EMailConstants.EMail.HOST);
+//            if (hostAtt == null) {
+//                Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Host Attribute is missing");
+//            }
+//            if (!hostAtt.hasSample()) {
+//                Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Waring Host has no samples");
+//            }
+//            _host = hostAtt.getLatestSample().getValueAsString();
+//            //end
+//
+//            _connectionTimeout = DatabaseHelper.getObjectAsInteger(mailObject, connectionTimeoutType);
+//            _readTimeout = DatabaseHelper.getObjectAsInteger(mailObject, readTimeoutType);
+//
+//            JEVisAttribute userAttr = mailObject.getAttribute(userType);
+//            if (!userAttr.hasSample()) {
+//                _userName = "";
+//            } else {
+//                _userName = DatabaseHelper.getObjectAsString(mailObject, userType);
+//            }
+//
+//            JEVisAttribute passAttr = mailObject.getAttribute(passwordType);
+//            if (!passAttr.hasSample()) {
+//                _password = "";
+//            } else {
+//                _password = DatabaseHelper.getObjectAsString(mailObject, passwordType);
+//            }
+//            JEVisAttribute folderAttr = mailObject.getAttribute(folderType);
+//            if (!passAttr.hasSample()) {
+//                _folderName = "INBOX";
+//            } else {
+//                _folderName = DatabaseHelper.getObjectAsString(mailObject, folderType);
+//            }
+//            _timezone = DatabaseHelper.getObjectAsString(mailObject, timezoneType);
+//            _ssl = DatabaseHelper.getObjectAsString(mailObject, sslType);
+//            _authentication = DatabaseHelper.getObjectAsString(mailObject, authenticationType);
+//            _enabled = DatabaseHelper.getObjectAsBoolean(mailObject, enableType);
+//        } catch (JEVisException ex) {
+//            Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         } catch (JEVisException ex) {
             Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -254,28 +244,26 @@ public class EMailDataSource implements DataSource {
 
     private void initializeChannelObjects(JEVisObject mailObject) {
         try {
-            JEVisClass channelDirClass = mailObject.getDataSource().getJEVisClass(DataCollectorTypes.ChannelDirectory.EMailChannelDirectory.NAME);
+            JEVisClass channelDirClass = mailObject.getDataSource().getJEVisClass(EMailConstants.EMailChannelDirectory.NAME);
             JEVisObject channelDir = mailObject.getChildren(channelDirClass, false).get(0);
-            JEVisClass channelClass = mailObject.getDataSource().getJEVisClass(DataCollectorTypes.Channel.EMailChannel.NAME);
+            JEVisClass channelClass = mailObject.getDataSource().getJEVisClass(EMailConstants.EMailChannel.NAME);
             _channels = channelDir.getChildren(channelClass, false);
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(EMailDataSource.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
-    
-    
-    private void getAttSample(JEVisObject mailObj) throws JEVisException
-    {
-        
-        attName = EMailConstants.EMail.HOST;
-        JEVisAttribute att = mailObj.getAttribute(EMailConstants.EMail.HOST);
-            if (att == null) {
-                Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Host Attribute is missing");
-            }
-            if (!att.hasSample()) {
-                Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Waring Host has no samples");
-            }
-            _host = hostAtt.getLatestSample().getValueAsString();
-    
-    }
+
+//    private void getAttSample(JEVisObject mailObj) throws JEVisException {
+//
+//        attName = EMailConstants.EMail.HOST;
+//        JEVisAttribute att = mailObj.getAttribute(EMailConstants.EMail.HOST);
+//        if (att == null) {
+//            Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Host Attribute is missing");
+//        }
+//        if (!att.hasSample()) {
+//            Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Waring Host has no samples");
+//        }
+//        _host = hostAtt.getLatestSample().getValueAsString();
+//
+//    }
 }

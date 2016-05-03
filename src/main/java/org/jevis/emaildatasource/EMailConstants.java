@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 bi
+ * Copyright (C) 2016 AI
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,12 @@
  */
 package org.jevis.emaildatasource;
 
+import java.util.logging.Level;
 import org.jevis.commons.driver.DataCollectorTypes;
 
 /**
  *
- * @author bi
+ * @author Artur Iablokov
  */
 public interface EMailConstants {
 
@@ -69,11 +70,25 @@ public interface EMailConstants {
         imap, pop3
     }
 
-    interface DefaultEMailParameters {
+    interface Errors {
+        public final static MailError HOST_ERR = new MailError("Host", "536350", Level.SEVERE);
+        public final static MailError USER_ERR = new MailError("User EMail", "536351", Level.SEVERE);
+        public final static MailError PASS_ERR = new MailError("Paasword", "536352", Level.SEVERE);
+        public final static MailError FOLD_ERR = new MailError("Folder name", "536353", Level.WARNING);
+        public final static MailError AUTH_ERR = new MailError("Host", "536354", Level.WARNING);
+        public final static MailError READ_ERR = new MailError("Host", "536355", Level.WARNING);
+        public final static MailError CONN_ERR = new MailError("Host", "536356", Level.WARNING);
+        public final static MailError SSL_ERR = new MailError("Host", "536357", Level.SEVERE);
+        public final static MailError TIMEZ_ERR = new MailError("Host", "536358", Level.WARNING);
+        public final static MailError PORT_ERR = new MailError("Host", "536359", Level.WARNING);
+        public final static MailError ENAB_ERR = new MailError("Host", "536360", Level.WARNING);
+    }
+
+    interface DefParameters {
 
         public final static String FOLDER_NAME = "INBOX";
         public final static String USER_EMAIL = "";
-        public final static String HOST = ""; 
+        public final static String HOST = "";
         public final static String PASSWORD = "";
         public final static String AUTHENTICATION = "";
         public final static String SSL = "";
@@ -81,5 +96,6 @@ public interface EMailConstants {
         public final static int PORT = 223;
         public final static int READ_TIMEOUT = 300;
         public final static int CONNECTION_TIMEOUT = 300;
+        public final static Boolean ENABLE = false;
     }
 }
