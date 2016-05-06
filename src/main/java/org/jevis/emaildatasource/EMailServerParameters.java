@@ -18,10 +18,9 @@ package org.jevis.emaildatasource;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jevis.api.JEVisAttribute;
 import org.jevis.api.JEVisException;
 import org.jevis.api.JEVisObject;
-import org.jevis.api.JEVisSample;
+import static org.jevis.emaildatasource.DBHelper.RetType.*;
 
 /**
  *
@@ -30,7 +29,7 @@ import org.jevis.api.JEVisSample;
 public class EMailServerParameters {
 
     private final JEVisObject _mailObj;
-    private EMailConstants.Protocol _protocol;
+    private String _protocol;
     private String _userEMail; //email adress
     private String _password;
     private String _host;
@@ -42,96 +41,47 @@ public class EMailServerParameters {
     private String _ssl;
     private String _authentication;
 
-    public EMailServerParameters(JEVisObject mailObj) throws JEVisException {
+    public EMailServerParameters(JEVisObject mailObj) throws Exception {
         _mailObj = mailObj;
-        setAllEMailParameteres();
+        try {
+            setAllEMailParameteres();
+        } catch (JEVisException ex) {
+            Logger.getLogger(EMailServerParameters.class.getName()).log(Level.SEVERE, "Failed to get server settings", ex);
+        }
     }
 
     /**
      * Sets all email parameters.
      */
     private void setAllEMailParameteres() throws JEVisException {
-        setProtocol();
-        _host = helper(_host, _mailObj, EMailConstants.EMail.HOST, EMailConstants.Errors.HOST_ERR, null);
-        _userEMail = helper(_userEMail, _mailObj, EMailConstants.EMail.USER, EMailConstants.Errors.USER_ERR, null);
-        _password = helper(_password, _mailObj, EMailConstants.EMail.PASSWORD, EMailConstants.Errors.PASS_ERR, null);
-        _folderName= helper(_folderName, _mailObj, EMailConstants.EMail.FOLDER, EMailConstants.Errors.FOLD_ERR, EMailConstants.DefParameters.FOLDER_NAME);
-        _authentication= helper(_password, _mailObj, EMailConstants.EMail.PASSWORD, EMailConstants.Errors.PASS_ERR, null);
-        _ssl= helper(_ssl, _mailObj, EMailConstants.EMail.SSL, EMailConstants.Errors.SSL_ERR, null);
-        _timezone= helper(_timezone, _mailObj, EMailConstants.EMail.TIMEZONE, EMailConstants.Errors.TIMEZ_ERR, EMailConstants.DefParameters.TIMEZONE);
-        _readTimeout = helper(_readTimeout, _mailObj, EMailConstants.EMail.READ_TIMEOUT, EMailConstants.Errors.READ_ERR, EMailConstants.DefParameters.READ_TIMEOUT);
-        _connectionTimeout = helper(_connectionTimeout, _mailObj, EMailConstants.EMail.CONNECTION_TIMEOUT, EMailConstants.Errors.CONN_ERR, EMailConstants.DefParameters.CONNECTION_TIMEOUT);
-        _enabled= helper(_enabled, _mailObj, EMailConstants.EMail.ENABLE, EMailConstants.Errors.ENAB_ERR, EMailConstants.DefParameters.ENABLE);
+        _protocol = setProtocol();
+        _host = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.HOST, EMailConstants.Errors.HOST_ERR, null);
+        _userEMail = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.USER, EMailConstants.Errors.USER_ERR, null);
+        _password = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.PASSWORD, EMailConstants.Errors.PASS_ERR, null);
+        _folderName = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.FOLDER, EMailConstants.Errors.FOLD_ERR, EMailConstants.DefParameters.FOLDER_NAME);
+        _authentication = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.PASSWORD, EMailConstants.Errors.PASS_ERR, null);
+        _ssl = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.SSL, EMailConstants.Errors.SSL_ERR, null);
+        _timezone = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.TIMEZONE, EMailConstants.Errors.TIMEZ_ERR, EMailConstants.DefParameters.TIMEZONE);
+        _readTimeout = DBHelper.getAttValue(INTEGER, _mailObj, EMailConstants.EMail.READ_TIMEOUT, EMailConstants.Errors.READ_ERR, EMailConstants.DefParameters.READ_TIMEOUT);
+        _connectionTimeout = DBHelper.getAttValue(INTEGER, _mailObj, EMailConstants.EMail.CONNECTION_TIMEOUT, EMailConstants.Errors.CONN_ERR, EMailConstants.DefParameters.CONNECTION_TIMEOUT);
+        _enabled = DBHelper.getAttValue(BOOLEAN, _mailObj, EMailConstants.EMail.ENABLE, EMailConstants.Errors.ENAB_ERR, EMailConstants.DefParameters.ENABLE);
     }
 
     /**
      * Sets the EMail clients protocol.
      */
-    private void setProtocol() throws JEVisException {
+    private String setProtocol() throws JEVisException {
         if (_mailObj.getJEVisClass().getName().equalsIgnoreCase(EMailConstants.EMail.IMAPEMail.NAME)) {
-            _protocol = EMailConstants.Protocol.imap;
+            return EMailConstants.Protocol.IMAP;
         } else if (_mailObj.getJEVisClass().getName().equalsIgnoreCase(EMailConstants.EMail.POP3EMail.NAME)) {
-            _protocol = EMailConstants.Protocol.pop3;
+            return EMailConstants.Protocol.POP3;
         } else {
             Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "EMail protocol is not received");
             throw new NullPointerException();
         }
-    }
+    } 
 
-    /**
-     * Sets the attributes values.
-     */
-    private <T> T helper(T t, JEVisObject obj, String attType, MailError error, T defaultValue) throws NullPointerException {
-        try {
-            JEVisAttribute att = obj.getAttribute(attType);
-            if (att == null) {
-                Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(),
-                        error.getMessage() + " Attribute is missing");
-            }
-            if (!att.hasSample()) {
-                Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Warning " + error.getMessage() + " has no samples");
-                if (defaultValue != null) {
-                    return (T) defaultValue;
-                } else {
-                    throw new NullPointerException(error.getMessage() + " is empty");
-                }
-            }
-
-            JEVisSample lastS = att.getLatestSample();
-
-            if (t instanceof String) {
-                try {
-                    return (T) lastS.getValueAsString();
-                } catch (Exception ex) {
-                    //fehlermeldung
-                    throw new NullPointerException();
-                }
-            } else if (t instanceof Integer) {
-                try {
-                    Long longValue = lastS.getValueAsLong();
-                    return (T) new Integer(longValue.intValue());
-                } catch (Exception ex) {
-                    //fehlermeldung
-                    throw new NullPointerException();
-                }
-            } else if (t instanceof Boolean) {
-                try {
-                    return (T) lastS.getValueAsBoolean();
-                } catch (Exception ex) {
-                    //fehlermeldung
-                    throw new NullPointerException();
-                }
-            } else {
-                throw new NullPointerException();
-                //fehlermeldung
-            }
-        } catch (JEVisException jex) {
-            //doSomething
-            throw new NullPointerException();
-        }
-    }
-
-    public EMailConstants.Protocol getProtocol() {
+    public String getProtocol() {
         return _protocol;
     }
 
@@ -173,5 +123,5 @@ public class EMailServerParameters {
 
     public String getAuthentication() {
         return _authentication;
-    }    
+    }
 }

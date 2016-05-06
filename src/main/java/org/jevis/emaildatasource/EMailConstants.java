@@ -66,8 +66,9 @@ public interface EMailConstants {
         public final static String SENDER = "Sender";
     }
 
-    public enum Protocol {
-        imap, pop3
+    interface Protocol{
+     public final static String POP3 = "pop3";
+     public final static String IMAP = "imap";
     }
 
     interface Errors {

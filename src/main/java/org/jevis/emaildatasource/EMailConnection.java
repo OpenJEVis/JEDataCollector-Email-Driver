@@ -35,12 +35,12 @@ public class EMailConnection {
     private Store _store;
     private Folder _folder;
     private Session _session;
-    
+
     public EMailConnection(EMailServerParameters parameters) {
         _parameters = parameters;
         setConnection();
     }
-    
+
     private void setConnection() {
         try {
             Properties props = new Properties();
@@ -57,12 +57,12 @@ public class EMailConnection {
         }
     }
 
-    public Folder getFolder(String foldername) {
+    public Folder getFolder() {
         try {
             if (!_store.isConnected()) {
                 org.apache.log4j.Logger.getLogger(this.getClass().getName()).log(org.apache.log4j.Level.ERROR, "Connected not possible");
             }
-            _folder = _store.getFolder(foldername);
+            _folder = _store.getFolder(_parameters.getFolderName());
         } catch (MessagingException ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Unable to open the inbox folder", ex);
         }
@@ -81,5 +81,4 @@ public class EMailConnection {
             Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "Email-Store terminate failed", ex);
         }
     }
-
 }
