@@ -43,9 +43,8 @@ public class EMailConnection {
 
     private void setConnection() {
         try {
-            Properties props = new Properties();
-            props.put("mail.debug", "true");
-            props.put("mail.store.protocol", "imaps");
+            Properties props = createProperties();
+
             //props.;    
             _session = Session.getInstance(props);
             _store = _session.getStore();
@@ -80,5 +79,29 @@ public class EMailConnection {
         } catch (MessagingException ex) {
             Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "Email-Store terminate failed", ex);
         }
+    }
+
+    private Properties createProperties() {
+
+        Properties props = new Properties();
+        String key = "mail." + _parameters.getProtocol();
+        props.put(key + ".host", _parameters.getHost());
+        props.put(key + ".port", _parameters.getPort());
+        props.put(key + ".connectiontimeout", _parameters.getConnectionTimeout() * 1000);
+        props.put(key + ".timeout", _parameters.getReadTimeout() * 1000);
+
+        String ssl = _parameters.getSsl();
+        if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.SSL_TLS)) {
+            props.put(key + ".ssl.enable", true);
+        } else if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.STARTTLS)) {
+            props.put(key + "starttls.enable", true);
+        }
+
+        //_parameters.getAuthentication() usually not used in SSL connections
+        
+//        props.put("mail.debug", "true");
+//        props.put("mail.store.protocol", "imaps");
+
+        return props;
     }
 }

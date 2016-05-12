@@ -66,12 +66,14 @@ public interface EMailConstants {
         public final static String SENDER = "Sender";
     }
 
-    interface Protocol{
-     public final static String POP3 = "pop3";
-     public final static String IMAP = "imap";
+    interface Protocol {
+
+        public final static String POP3 = "pop3";
+        public final static String IMAP = "imap";
     }
 
     interface Errors {
+
         public final static MailError HOST_ERR = new MailError("Host", "536350", Level.SEVERE);
         public final static MailError USER_ERR = new MailError("User EMail", "536351", Level.SEVERE);
         public final static MailError PASS_ERR = new MailError("Paasword", "536352", Level.SEVERE);
@@ -94,9 +96,18 @@ public interface EMailConstants {
         public final static String AUTHENTICATION = "";
         public final static String SSL = "";
         public final static String TIMEZONE = "UTC";
-        public final static int PORT = 223;
+        public final static int PORT = 143;
         public final static int READ_TIMEOUT = 300;
         public final static int CONNECTION_TIMEOUT = 300;
         public final static Boolean ENABLE = false;
+    }
+
+    interface ValidValues {
+
+        interface CryptProtocols {
+
+            public final static String SSL_TLS = "SSL/TLS";
+            public final static String STARTTLS = "STARTTLS";
+        }
     }
 }

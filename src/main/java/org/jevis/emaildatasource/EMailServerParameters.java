@@ -28,11 +28,12 @@ import static org.jevis.emaildatasource.DBHelper.RetType.*;
  */
 public class EMailServerParameters {
 
-    private final JEVisObject _mailObj;
+    private JEVisObject _mailObj;
     private String _protocol;
     private String _userEMail; //email adress
     private String _password;
     private String _host;
+    private Integer _port;
     private String _folderName;
     private Integer _connectionTimeout;
     private Integer _readTimeout;
@@ -40,6 +41,7 @@ public class EMailServerParameters {
     private String _timezone;
     private String _ssl;
     private String _authentication;
+    
 
     public EMailServerParameters(JEVisObject mailObj) throws Exception {
         _mailObj = mailObj;
@@ -56,11 +58,12 @@ public class EMailServerParameters {
     private void setAllEMailParameteres() throws JEVisException {
         _protocol = setProtocol();
         _host = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.HOST, EMailConstants.Errors.HOST_ERR, null);
+        _port = DBHelper.getAttValue(INTEGER, _mailObj, EMailConstants.EMail.PORT,EMailConstants.Errors.PORT_ERR, EMailConstants.DefParameters.PORT);
         _userEMail = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.USER, EMailConstants.Errors.USER_ERR, null);
         _password = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.PASSWORD, EMailConstants.Errors.PASS_ERR, null);
         _folderName = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.FOLDER, EMailConstants.Errors.FOLD_ERR, EMailConstants.DefParameters.FOLDER_NAME);
-        _authentication = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.PASSWORD, EMailConstants.Errors.PASS_ERR, null);
-        _ssl = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.SSL, EMailConstants.Errors.SSL_ERR, null);
+        _authentication = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.AUTHENTICATION, EMailConstants.Errors.AUTH_ERR, EMailConstants.DefParameters.AUTHENTICATION);
+        _ssl = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.SSL, EMailConstants.Errors.SSL_ERR, EMailConstants.DefParameters.SSL);
         _timezone = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.TIMEZONE, EMailConstants.Errors.TIMEZ_ERR, EMailConstants.DefParameters.TIMEZONE);
         _readTimeout = DBHelper.getAttValue(INTEGER, _mailObj, EMailConstants.EMail.READ_TIMEOUT, EMailConstants.Errors.READ_ERR, EMailConstants.DefParameters.READ_TIMEOUT);
         _connectionTimeout = DBHelper.getAttValue(INTEGER, _mailObj, EMailConstants.EMail.CONNECTION_TIMEOUT, EMailConstants.Errors.CONN_ERR, EMailConstants.DefParameters.CONNECTION_TIMEOUT);
@@ -81,46 +84,86 @@ public class EMailServerParameters {
         }
     } 
 
+    /**
+     * @return email protocol
+     */
     public String getProtocol() {
         return _protocol;
     }
 
+    /**
+     * @return user email address
+     */
     public String getUserEMail() {
         return _userEMail;
     }
 
+    /**
+     * @return email password
+     */
     public String getPassword() {
         return _password;
     }
-
+    
+    /**
+     * @return host
+     */
     public String getHost() {
         return _host;
     }
+    
+    /**
+     * @return port
+     */
+    public Integer getPort() {
+        return _port;
+    }
 
+    /**
+     * @return folder name
+     */
     public String getFolderName() {
         return _folderName;
     }
-
+    
+    /**
+     * @return connection timeout (in seconds)
+     */
     public Integer getConnectionTimeout() {
         return _connectionTimeout;
     }
 
+    /**
+     * @return read timeout (in seconds)
+     */
     public Integer getReadTimeout() {
         return _readTimeout;
     }
-
+    
+    /**
+     * @return enabled status
+     */
     public Boolean getEnabled() {
         return _enabled;
     }
-
+    
+    /**
+     * @return time zone
+     */
     public String getTimezone() {
         return _timezone;
     }
-
+    
+    /**
+     * @return SSL type
+     */
     public String getSsl() {
         return _ssl;
     }
-
+    
+    /**
+     * @return authentication type
+     */
     public String getAuthentication() {
         return _authentication;
     }

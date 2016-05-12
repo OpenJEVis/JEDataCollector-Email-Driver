@@ -114,10 +114,6 @@ public class EMailDataSource implements DataSource {
             try {
                 if (message.isMimeType("multipart/mixed")) {
                     Multipart multiPart = (Multipart) message.getContent();
-//                    System.out.println("///message-start///");
-//                    System.out.println("MESSAGE_FROM!!! " + message.getFrom());
-//                    System.out.println("MESSAGE_SUB!!! " + message.getSubject());
-//                    System.out.println("MESSAGE_DATE!!! " + message.getReceivedDate());
                     // For all multipart contents
                     for (int i = 0; i < multiPart.getCount(); i++) {
                         MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(i);
@@ -167,18 +163,4 @@ public class EMailDataSource implements DataSource {
             java.util.logging.Logger.getLogger(EMailDataSource.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
-
-//    private void getAttSample(JEVisObject mailObj) throws JEVisException {
-//
-//        attName = EMailConstants.EMail.HOST;
-//        JEVisAttribute att = mailObj.getAttribute(EMailConstants.EMail.HOST);
-//        if (att == null) {
-//            Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Host Attribute is missing");
-//        }
-//        if (!att.hasSample()) {
-//            Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Waring Host has no samples");
-//        }
-//        _host = hostAtt.getLatestSample().getValueAsString();
-//
-//    }
 }

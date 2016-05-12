@@ -55,11 +55,17 @@ public class DBHelper {
                 Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "{0} Attribute is missing", error.getMessage());
             }
             if (!att.hasSample()) {
-                Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Warning {0} has no samples", error.getMessage());
-                if (defValue != null) {
-                    return (T) defValue;
-                } else {
-                    throw new NullPointerException(error.getMessage() + " is empty");
+                Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Warning! {0} has no samples", error.getMessage());
+                return getDefValue(defValue, error);
+//                if (defValue != null) {
+//                    return (T) defValue;
+//                } else {
+//                    throw new NullPointerException(error.getMessage() + " is empty");
+//                }
+            } else {
+                System.out.println("Sample count: " + att.getSampleCount());
+                for (JEVisSample s : att.getAllSamples()) {
+                    System.out.println("s: " + s.getTimestamp() + "=" + s.getValue());
                 }
             }
 
@@ -68,7 +74,12 @@ public class DBHelper {
             switch (rtype) {
                 case STRING:
                     try {
-                        return (T) lastS.getValueAsString();
+                        if (lastS.getValueAsString().equals("")) {
+                            Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Warning! {0} has empty string", error.getMessage());
+                            return getDefValue(defValue, error);
+                        } else {
+                            return (T) lastS.getValueAsString();
+                        }
                     } catch (Exception ex) {
                         Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Attribute {0}: failed to get the value", error.getMessage());
                         throw new NullPointerException();
@@ -79,22 +90,30 @@ public class DBHelper {
                         return (T) new Integer(longValue.intValue());
                     } catch (Exception ex) {
                         Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Attribute {0}: failed to get the value", error.getMessage());
-                        throw new NullPointerException();
+                        return getDefValue(defValue, error);
                     }
                 case BOOLEAN:
                     try {
                         return (T) lastS.getValueAsBoolean();
                     } catch (Exception ex) {
-                        Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Attribute {0}: failed to get the value", error.getMessage());
+                        Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Attribute {0}: failed to get the value. ", error.getMessage());
                         throw new NullPointerException();
                     }
                 default:
-                    Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Attribute {0}: return type is wrong", error.getMessage());
+                    Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Attribute {0}: return type is wrong or unknown.", error.getMessage());
                     throw new NullPointerException();
             }
 
         } catch (JEVisException jex) {
             throw new NullPointerException();
+        }
+    }
+
+    private static <T> T getDefValue(T defValue, MailError error) {
+        if (defValue != null) {
+            return (T) defValue;
+        } else {
+            throw new NullPointerException(error.getMessage() + " is empty");
         }
     }
 }
