@@ -16,14 +16,23 @@
  */
 package org.jevis.emaildatasource;
 
+import com.sun.xml.internal.fastinfoset.algorithm.IEEE754FloatingPointEncodingAlgorithm;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Folder;
+import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
+import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.internet.MimeBodyPart;
+import org.jevis.api.JEVisException;
 
 /**
  *
@@ -31,66 +40,50 @@ import javax.mail.Store;
  */
 public class EMailConnection {
 
-    private final EMailServerParameters _parameters;
+    private EMailServerParameters _parameters;
     private Store _store;
     private Folder _folder;
     private Session _session;
 
-    public EMailConnection(EMailServerParameters parameters) {
-        _parameters = parameters;
-        setConnection();
-    }
-
-    private void setConnection() {
-        try {
-            Properties props = createProperties();
-
-            //props.;    
-            _session = Session.getInstance(props);
-            _store = _session.getStore();
-            _store.connect(_parameters.getHost(), _parameters.getUserEMail(), _parameters.getPassword());
-        } catch (NoSuchProviderException ex) {
-            Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "EMail Connection failed", ex);
-        } catch (MessagingException ex) {
-            Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "EMail Connection failed", ex);
+//    /**
+//     *
+//     * @param parameters parameters for
+//     */
+//    public EMailConnection(EMailServerParameters parameters) {
+//        _parameters = parameters;
+//        setConnection();
+//    }
+    public static IEMailConnection setConnection(EMailServerParameters parameters) {
+        
+        Properties props = createProperties(parameters);
+        Session session = Session.getInstance(props);
+        if (parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {         
+            return new IMAPConnection(session);
+        }
+        else if(parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)){
+            return new POP3Connection(parameters);
+        }
+        else{
+            Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "EMail Connection failed");
+            return null; //!!!!!!!!!!
         }
     }
-
-    public Folder getFolder() {
-        try {
-            if (!_store.isConnected()) {
-                org.apache.log4j.Logger.getLogger(this.getClass().getName()).log(org.apache.log4j.Level.ERROR, "Connected not possible");
-            }
-            _folder = _store.getFolder(_parameters.getFolderName());
-        } catch (MessagingException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Unable to open the inbox folder", ex);
-        }
-        return _folder;
+ 
+    
+    public static void terminate(IEMailConnection conn) {
+        conn.terminate();
     }
 
-    public void terminate() {
-        try {
-            _folder.close(false);
-        } catch (MessagingException ex) {
-            Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "Email-Folder terminate failed", ex);
-        }
-        try {
-            _store.close();
-        } catch (MessagingException ex) {
-            Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "Email-Store terminate failed", ex);
-        }
-    }
-
-    private Properties createProperties() {
+    private Properties createProperties(EMailServerParameters parameters) {
 
         Properties props = new Properties();
-        String key = "mail." + _parameters.getProtocol();
-        props.put(key + ".host", _parameters.getHost());
-        props.put(key + ".port", _parameters.getPort());
-        props.put(key + ".connectiontimeout", _parameters.getConnectionTimeout() * 1000);
-        props.put(key + ".timeout", _parameters.getReadTimeout() * 1000);
+        String key = "mail." + parameters.getProtocol();
+        props.put(key + ".host", parameters.getHost());
+        props.put(key + ".port", parameters.getPort());
+        props.put(key + ".connectiontimeout", parameters.getConnectionTimeout() * 1000);
+        props.put(key + ".timeout", parameters.getReadTimeout() * 1000);
 
-        String ssl = _parameters.getSsl();
+        String ssl = parameters.getSsl();
         if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.SSL_TLS)) {
             props.put(key + ".ssl.enable", true);
         } else if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.STARTTLS)) {
@@ -98,10 +91,8 @@ public class EMailConnection {
         }
 
         //_parameters.getAuthentication() usually not used in SSL connections
-        
 //        props.put("mail.debug", "true");
 //        props.put("mail.store.protocol", "imaps");
-
         return props;
     }
 }

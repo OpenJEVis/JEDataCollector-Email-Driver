@@ -37,7 +37,6 @@ import org.jevis.api.JEVisException;
 import org.jevis.api.JEVisObject;
 import org.jevis.api.JEVisType;
 import org.jevis.commons.DatabaseHelper;
-import org.jevis.commons.driver.DataCollectorTypes;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 
@@ -52,27 +51,28 @@ public class MessageFilter {
     private DateTime _lastReadout;
     private SearchTerm _searchTerm;
 
-    public MessageFilter() {
+    public MessageFilter(JEVisObject channel) {
+        setSearchTerms(channel);
     }
 
     private void getChannelAttribute(JEVisObject channel) {
 
+        JEVisClass channelClass;
         try {
-            JEVisClass channelClass;
             channelClass = channel.getJEVisClass();
-
-            JEVisType senderType = channelClass.getType(EMailConstants.EMailChannel.SENDER);
-            _sender = DatabaseHelper.getObjectAsString(channel, senderType);
-            JEVisType subjectType = channelClass.getType(EMailConstants.EMailChannel.SUBJECT);
-            _subject = DatabaseHelper.getObjectAsString(channel, subjectType);
-            JEVisType readoutType = channelClass.getType(EMailConstants.EMailChannel.LAST_READOUT);
-            _lastReadout = DatabaseHelper.getObjectAsDate(channel, readoutType, DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
         } catch (JEVisException ex) {
-            Logger.getLogger(MessageFilter.class.getName()).log(Level.SEVERE, "Channel Attribute", ex);
+            Logger.getLogger(MessageFilter.class.getName()).log(Level.SEVERE, "failed to get attributes for the channel.", ex);
         }
+
+        _sender = DBHelper.getAttValue(DBHelper.RetType.STRING, channel, EMailConstants.EMailChannel.SENDER, EMailConstants.Errors.SEND_ERR, null);
+        _subject = DBHelper.getAttValue(DBHelper.RetType.STRING, channel, EMailConstants.EMailChannel.SUBJECT, EMailConstants.Errors.SUBJ_ERR, null);
+        _lastReadout = DBHelper.getAttValue(DBHelper.RetType.STRING, channel, EMailConstants.EMailChannel.SENDER, EMailConstants.Errors.LASTR_ERR, null);
+
+//            JEVisType readoutType = channelClass.getType(EMailConstants.EMailChannel.LAST_READOUT);
+//            _lastReadout = DatabaseHelper.getObjectAsDate(channel, readoutType, DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
-    public void setSearchTerms(JEVisObject channel){
+    private void setSearchTerms(JEVisObject channel) {
 
         getChannelAttribute(channel);
         SearchTerm newerThan = new ReceivedDateTerm(ComparisonTerm.GT, _lastReadout.toDate());
@@ -87,14 +87,7 @@ public class MessageFilter {
 
     }
 
-    public List<Message> getMessageList(Folder folder) {
-        List<Message> messageList = null;
-        try {
-            folder.open(Folder.READ_ONLY);
-            messageList = Arrays.asList(folder.search(_searchTerm));
-        } catch (MessagingException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Unable to search for messages.", ex);
-        }
-        return messageList;
+    public SearchTerm getSearchTerms() {
+        return _searchTerm;
     }
 }

@@ -57,7 +57,7 @@ public class EMailDataSource implements DataSource {
     private List<Result> _result;
 
     private EMailServerParameters _eMailServerParameters;
-    private EMailConnection _eMailConnection;
+    private IEMailConnection _eMailConnection;
     private MessageFilter _messageFilter;
 
     @Override
@@ -104,33 +104,17 @@ public class EMailDataSource implements DataSource {
     public List<InputStream> sendSampleRequest(JEVisObject channel) {
         List<InputStream> answerList = new ArrayList<>();
 
-        _eMailConnection = new EMailConnection(_eMailServerParameters);
-        _messageFilter = new MessageFilter();
-        Folder folder = _eMailConnection.getFolder();
-        _messageFilter.setSearchTerms(channel);
-        List<Message> messages = _messageFilter.getMessageList(folder);
+        _eMailConnection = EMailConnection.setConnection(_eMailServerParameters);
+        _messageFilter = new MessageFilter(channel);
+        answerList = EMailManager.getAnswerList(_messageFilter, _eMailConnection);
+        
+               
+        
+        
+        //
+        
 
-        for (Message message : messages) {
-            try {
-                if (message.isMimeType("multipart/mixed")) {
-                    Multipart multiPart = (Multipart) message.getContent();
-                    // For all multipart contents
-                    for (int i = 0; i < multiPart.getCount(); i++) {
-                        MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(i);
-                        // If multipart content is attachment
-                        System.out.println("Name is: " + part.getFileName());
-                        String disp = part.getDisposition();
-                        if (Part.ATTACHMENT.equalsIgnoreCase(disp) || disp == null) {
-                            System.out.println("EMail attach: " + " " + part.getFileName() + " !///! " + part.getContentType());
-                        }
-                    }
-                }
-            } catch (MessagingException | IOException ex) {
-                Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "could not process the attachment!", ex);
-            }
-        }
-
-        _eMailConnection.terminate();
+        EMailConnection.terminate(_eMailConnection);
         return answerList;
     }
 
@@ -152,7 +136,9 @@ public class EMailDataSource implements DataSource {
             Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
+    
+    
     private void initializeChannelObjects(JEVisObject mailObject) {
         try {
             JEVisClass channelDirClass = mailObject.getDataSource().getJEVisClass(EMailConstants.EMailChannelDirectory.NAME);

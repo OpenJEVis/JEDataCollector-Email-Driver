@@ -16,48 +16,25 @@
  */
 package org.jevis.emaildatasource;
 
-import java.util.logging.Level;
+import java.io.InputStream;
+import java.util.List;
+import javax.mail.Folder;
 
 /**
  *
- * @author ai
+ * @author bi
  */
-public class MailError {
+public interface IEMailConnection {
+
+    /**
+     * @return inbox folder
+     */
+    //public Folder getFolder();
     
-    private String message;
-    private String id;
-    private Level level;
-
-    public MailError(String message, String id, Level level) {
-        this.message = message;
-        this.id = id;
-        this.level = level;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Level getLevel() {
-        return level;
-    }
-
-    public void setLevel(Level level) {
-        this.level = level;
-    }
+    /**
+     * terminate email connection
+     */
+    public void terminate();
     
-    
-    
+    public Folder getFolder();
 }

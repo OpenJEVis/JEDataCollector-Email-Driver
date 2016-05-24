@@ -85,6 +85,9 @@ public interface EMailConstants {
         public final static MailError TIMEZ_ERR = new MailError("Host", "536358", Level.WARNING);
         public final static MailError PORT_ERR = new MailError("Host", "536359", Level.WARNING);
         public final static MailError ENAB_ERR = new MailError("Host", "536360", Level.WARNING);
+        public final static MailError SEND_ERR = new MailError("Sender", "536361", Level.SEVERE);
+        public final static MailError SUBJ_ERR = new MailError("Subject", "536362", Level.WARNING);
+        public final static MailError LASTR_ERR = new MailError("Last readout", "536363", Level.WARNING);
     }
 
     interface DefParameters {
