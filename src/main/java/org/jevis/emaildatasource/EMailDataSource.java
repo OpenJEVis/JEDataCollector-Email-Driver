@@ -19,22 +19,15 @@
  */
 package org.jevis.emaildatasource;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.*;
 import org.jevis.api.JEVisObject;
 import org.jevis.commons.driver.DataSource;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.mail.internet.MimeBodyPart;
-
 import org.jevis.api.JEVisClass;
-import org.jevis.api.JEVisException;
-import org.jevis.api.sql.JEVisDataSourceSQL;
-import org.jevis.commons.cli.JEVisCommandLine;
 import org.jevis.commons.driver.DataCollectorTypes;
 import org.jevis.commons.driver.Importer;
 import org.jevis.commons.driver.ImporterFactory;
@@ -104,17 +97,11 @@ public class EMailDataSource implements DataSource {
     public List<InputStream> sendSampleRequest(JEVisObject channel) {
         List<InputStream> answerList = new ArrayList<>();
 
-        _eMailConnection = EMailConnection.setConnection(_eMailServerParameters);
+        _eMailConnection = EMailManager.createConnection(_eMailServerParameters);
         _messageFilter = new MessageFilter(channel);
         answerList = EMailManager.getAnswerList(_messageFilter, _eMailConnection);
-        
-               
-        
-        
         //
-        
-
-        EMailConnection.terminate(_eMailConnection);
+        EMailManager.terminate(_eMailConnection);
         return answerList;
     }
 

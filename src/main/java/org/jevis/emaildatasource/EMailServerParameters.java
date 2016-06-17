@@ -20,7 +20,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jevis.api.JEVisException;
 import org.jevis.api.JEVisObject;
-import static org.jevis.emaildatasource.DBHelper.RetType.*;
 
 /**
  *
@@ -57,17 +56,17 @@ public class EMailServerParameters {
      */
     private void setAllEMailParameteres() throws JEVisException {
         _protocol = setProtocol();
-        _host = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.HOST, EMailConstants.Errors.HOST_ERR, null);
-        _port = DBHelper.getAttValue(INTEGER, _mailObj, EMailConstants.EMail.PORT,EMailConstants.Errors.PORT_ERR, EMailConstants.DefParameters.PORT);
-        _userEMail = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.USER, EMailConstants.Errors.USER_ERR, null);
-        _password = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.PASSWORD, EMailConstants.Errors.PASS_ERR, null);
-        _folderName = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.FOLDER, EMailConstants.Errors.FOLD_ERR, EMailConstants.DefParameters.FOLDER_NAME);
-        _authentication = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.AUTHENTICATION, EMailConstants.Errors.AUTH_ERR, EMailConstants.DefParameters.AUTHENTICATION);
-        _ssl = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.SSL, EMailConstants.Errors.SSL_ERR, EMailConstants.DefParameters.SSL);
-        _timezone = DBHelper.getAttValue(STRING, _mailObj, EMailConstants.EMail.TIMEZONE, EMailConstants.Errors.TIMEZ_ERR, EMailConstants.DefParameters.TIMEZONE);
-        _readTimeout = DBHelper.getAttValue(INTEGER, _mailObj, EMailConstants.EMail.READ_TIMEOUT, EMailConstants.Errors.READ_ERR, EMailConstants.DefParameters.READ_TIMEOUT);
-        _connectionTimeout = DBHelper.getAttValue(INTEGER, _mailObj, EMailConstants.EMail.CONNECTION_TIMEOUT, EMailConstants.Errors.CONN_ERR, EMailConstants.DefParameters.CONNECTION_TIMEOUT);
-        _enabled = DBHelper.getAttValue(BOOLEAN, _mailObj, EMailConstants.EMail.ENABLE, EMailConstants.Errors.ENAB_ERR, EMailConstants.DefParameters.ENABLE);
+        _host = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.HOST, EMailConstants.Errors.HOST_ERR, null);
+        _port = DBHelper.getAttValue(DBHelper.RetType.INTEGER, _mailObj, EMailConstants.EMail.PORT,EMailConstants.Errors.PORT_ERR, EMailConstants.DefParameters.PORT);
+        _userEMail = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.USER, EMailConstants.Errors.USER_ERR, null);
+        _password = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.PASSWORD, EMailConstants.Errors.PASS_ERR, null);
+        _folderName = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.FOLDER, EMailConstants.Errors.FOLD_ERR, EMailConstants.DefParameters.FOLDER_NAME);
+        _authentication = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.AUTHENTICATION, EMailConstants.Errors.AUTH_ERR, EMailConstants.DefParameters.AUTHENTICATION);
+        _ssl = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.SSL, EMailConstants.Errors.SSL_ERR, EMailConstants.DefParameters.SSL);
+        _timezone = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.TIMEZONE, EMailConstants.Errors.TIMEZ_ERR, EMailConstants.DefParameters.TIMEZONE);
+        _readTimeout = DBHelper.getAttValue(DBHelper.RetType.INTEGER, _mailObj, EMailConstants.EMail.READ_TIMEOUT, EMailConstants.Errors.READ_ERR, EMailConstants.DefParameters.READ_TIMEOUT);
+        _connectionTimeout = DBHelper.getAttValue(DBHelper.RetType.INTEGER, _mailObj, EMailConstants.EMail.CONNECTION_TIMEOUT, EMailConstants.Errors.CONN_ERR, EMailConstants.DefParameters.CONNECTION_TIMEOUT);
+        _enabled = DBHelper.getAttValue(DBHelper.RetType.BOOLEAN, _mailObj, EMailConstants.EMail.ENABLE, EMailConstants.Errors.ENAB_ERR, EMailConstants.DefParameters.ENABLE);
     }
 
     /**

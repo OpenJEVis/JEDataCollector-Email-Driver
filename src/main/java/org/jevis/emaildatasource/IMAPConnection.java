@@ -17,24 +17,13 @@
 package org.jevis.emaildatasource;
 
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPSSLStore;
-import com.sun.mail.imap.IMAPStore;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Folder;
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.NoSuchProviderException;
-import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
-import javax.mail.internet.MimeBodyPart;
 
 /**
  *
@@ -42,48 +31,32 @@ import javax.mail.internet.MimeBodyPart;
  */
 public class IMAPConnection implements IEMailConnection {
 
-    private IMAPStore _store;
+    private Store _store;
     private IMAPFolder _folder;
     private IMAPSSLStore _sslStore;
-    private EMailServerParameters _parameters;
+    private String _foldName;
 
-
-    IMAPConnection(Session session) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    IMAPConnection() {
     }
 
- 
-
-    
-    /**
-     *
-     * @param parameters parameters for
-     */
-//    public EMailConnection(EMailServerParameters parameters) {
-//        _parameters = parameters;
-//        setConnection();
-//    }
-
-    private void setConnection(Session session) {
+    public void setConnection(Session session, EMailServerParameters param) {
         try {
-            _store = (IMAPStore) session.getStore();
-        } catch (NoSuchProviderException ex) {
-            Logger.getLogger(IMAPConnection.class.getName()).log(Level.SEVERE, "EMail Connection session failed", ex);
-        }
-        try {
-            _store.connect(_parameters.getHost(), _parameters.getUserEMail(), _parameters.getPassword());
+            _store = session.getStore();
+            _foldName = param.getFolderName();
+            _store.connect(param.getHost(), param.getUserEMail(), param.getPassword());
         } catch (MessagingException ex) {
             Logger.getLogger(IMAPConnection.class.getName()).log(Level.SEVERE, "EMail Connection setting failed", ex);
         }
-        
+
     }
 
+    @Override
     public Folder getFolder() {
         try {
             if (!_store.isConnected()) {
                 org.apache.log4j.Logger.getLogger(this.getClass().getName()).log(org.apache.log4j.Level.ERROR, "Connected not possible");
             }
-            _folder = (IMAPFolder) _store.getFolder(_parameters.getFolderName());
+            _folder = (IMAPFolder) _store.getFolder(_foldName);
         } catch (MessagingException ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Unable to open the inbox folder", ex);
         }

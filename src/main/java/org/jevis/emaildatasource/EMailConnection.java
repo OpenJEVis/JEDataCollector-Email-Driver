@@ -40,59 +40,62 @@ import org.jevis.api.JEVisException;
  */
 public class EMailConnection {
 
-    private EMailServerParameters _parameters;
-    private Store _store;
-    private Folder _folder;
-    private Session _session;
-
-//    /**
-//     *
-//     * @param parameters parameters for
-//     */
-//    public EMailConnection(EMailServerParameters parameters) {
-//        _parameters = parameters;
-//        setConnection();
+//    private EMailServerParameters _parameters;
+//    private Store _store;
+//    private Folder _folder;
+//    private Session _session;
+//
+////    /**
+////     *
+////     * @param parameters parameters for
+////     */
+////    public EMailConnection(EMailServerParameters parameters) {
+////        _parameters = parameters;
+////        setConnection();
+////    }
+//    public static IEMailConnection createConnection(EMailServerParameters parameters) {
+//        
+//        Properties props = createProperties(parameters);
+//        Session session = Session.getInstance(props);
+//        if (parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {         
+//            IEMailConnection conn = new IMAPConnection();
+//            conn.setConnection(session, parameters);
+//            return conn;
+//        }
+//        else if(parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)){
+//            return null;//new POP3Connection(parameters);
+//        }
+//        else{
+//            Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "EMail Connection failed");
+//            return null; //!!!!!!!!!!
+//        }
 //    }
-    public static IEMailConnection setConnection(EMailServerParameters parameters) {
-        
-        Properties props = createProperties(parameters);
-        Session session = Session.getInstance(props);
-        if (parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {         
-            return new IMAPConnection(session);
-        }
-        else if(parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)){
-            return new POP3Connection(parameters);
-        }
-        else{
-            Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "EMail Connection failed");
-            return null; //!!!!!!!!!!
-        }
-    }
- 
-    
-    public static void terminate(IEMailConnection conn) {
-        conn.terminate();
-    }
-
-    private Properties createProperties(EMailServerParameters parameters) {
-
-        Properties props = new Properties();
-        String key = "mail." + parameters.getProtocol();
-        props.put(key + ".host", parameters.getHost());
-        props.put(key + ".port", parameters.getPort());
-        props.put(key + ".connectiontimeout", parameters.getConnectionTimeout() * 1000);
-        props.put(key + ".timeout", parameters.getReadTimeout() * 1000);
-
-        String ssl = parameters.getSsl();
-        if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.SSL_TLS)) {
-            props.put(key + ".ssl.enable", true);
-        } else if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.STARTTLS)) {
-            props.put(key + "starttls.enable", true);
-        }
-
-        //_parameters.getAuthentication() usually not used in SSL connections
+// 
+//    
+//    public static void terminate(IEMailConnection conn) {
+//        conn.terminate();
+//    }
+//
+//    private static Properties createProperties(EMailServerParameters parameters) {
+//
+//        Properties props = new Properties();
+//        String key = "mail." + parameters.getProtocol();
+//        System.out.println("Key is: "+key);
+//        props.put(key + ".host", parameters.getHost());
+//        props.put(key + ".port", parameters.getPort());
+//        props.put(key + ".connectiontimeout", parameters.getConnectionTimeout()); //*1000?ms
+//        props.put(key + ".timeout", parameters.getReadTimeout());    //*1000?ms
+//
+////        String ssl = parameters.getSsl();
+////        if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.SSL_TLS)) {
+////            props.put(key + ".ssl.enable", true);
+////        } else if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.STARTTLS)) {
+////            props.put(key + "starttls.enable", true);
+////        }
+//
+//        //_parameters.getAuthentication() usually not used in SSL connections
 //        props.put("mail.debug", "true");
 //        props.put("mail.store.protocol", "imaps");
-        return props;
-    }
+//        return props;
+//    }
 }

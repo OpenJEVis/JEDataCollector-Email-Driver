@@ -16,9 +16,8 @@
  */
 package org.jevis.emaildatasource;
 
-import java.io.InputStream;
-import java.util.List;
 import javax.mail.Folder;
+import javax.mail.Session;
 
 /**
  *
@@ -36,5 +35,13 @@ public interface IEMailConnection {
      */
     public void terminate();
     
+    /**
+     * set email connection
+     */
+    public void setConnection(Session session, EMailServerParameters param);
+    
+    /**
+     * get email folder
+     */
     public Folder getFolder();
 }

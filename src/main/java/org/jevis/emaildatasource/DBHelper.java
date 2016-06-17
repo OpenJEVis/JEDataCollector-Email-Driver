@@ -1,10 +1,12 @@
 package org.jevis.emaildatasource;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jevis.api.JEVisAttribute;
 import org.jevis.api.JEVisException;
 import org.jevis.api.JEVisObject;
 import org.jevis.api.JEVisSample;
+import org.joda.time.format.DateTimeFormat;
 
 
 /*
@@ -33,7 +35,7 @@ public class DBHelper {
      * return type
      */
     public static enum RetType {
-        STRING, BOOLEAN, INTEGER
+        STRING, BOOLEAN, INTEGER, DATETIME
     }
 
     /**
@@ -99,6 +101,14 @@ public class DBHelper {
                         Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Attribute {0}: failed to get the value. ", error.getMessage());
                         throw new NullPointerException();
                     }
+                case DATETIME:
+                    try {
+                        String value = lastS.getValueAsString();
+                        return (T) DateTimeFormat.forPattern(EMailConstants.ValidValues.TIMEFORMAT).parseDateTime(value);
+                    } catch (JEVisException ex) {
+                        Logger.getLogger(DBHelper.class.getName()).log(error.getLevel(), "Attribute {0}: failed to get the value. ", error.getMessage());
+                    }
+
                 default:
                     Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Attribute {0}: return type is wrong or unknown.", error.getMessage());
                     throw new NullPointerException();

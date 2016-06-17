@@ -78,13 +78,13 @@ public interface EMailConstants {
         public final static MailError USER_ERR = new MailError("User EMail", "536351", Level.SEVERE);
         public final static MailError PASS_ERR = new MailError("Paasword", "536352", Level.SEVERE);
         public final static MailError FOLD_ERR = new MailError("Folder name", "536353", Level.WARNING);
-        public final static MailError AUTH_ERR = new MailError("Host", "536354", Level.WARNING);
-        public final static MailError READ_ERR = new MailError("Host", "536355", Level.WARNING);
-        public final static MailError CONN_ERR = new MailError("Host", "536356", Level.WARNING);
-        public final static MailError SSL_ERR = new MailError("Host", "536357", Level.SEVERE);
-        public final static MailError TIMEZ_ERR = new MailError("Host", "536358", Level.WARNING);
-        public final static MailError PORT_ERR = new MailError("Host", "536359", Level.WARNING);
-        public final static MailError ENAB_ERR = new MailError("Host", "536360", Level.WARNING);
+        public final static MailError AUTH_ERR = new MailError("Authentication", "536354", Level.WARNING);
+        public final static MailError READ_ERR = new MailError("Read timeout", "536355", Level.WARNING);
+        public final static MailError CONN_ERR = new MailError("Connection timeout", "536356", Level.WARNING);
+        public final static MailError SSL_ERR = new MailError("SSL", "536357", Level.SEVERE);
+        public final static MailError TIMEZ_ERR = new MailError("Timezone", "536358", Level.WARNING);
+        public final static MailError PORT_ERR = new MailError("Port", "536359", Level.WARNING);
+        public final static MailError ENAB_ERR = new MailError("Enable", "536360", Level.WARNING);
         public final static MailError SEND_ERR = new MailError("Sender", "536361", Level.SEVERE);
         public final static MailError SUBJ_ERR = new MailError("Subject", "536362", Level.WARNING);
         public final static MailError LASTR_ERR = new MailError("Last readout", "536363", Level.WARNING);
@@ -106,6 +106,8 @@ public interface EMailConstants {
     }
 
     interface ValidValues {
+        
+        public final static String TIMEFORMAT = "yyyy-MM-dd HH:mm:ss";
 
         interface CryptProtocols {
 
