@@ -40,14 +40,13 @@ public class EMailServerParameters {
     private String _timezone;
     private String _ssl;
     private String _authentication;
-    
 
     public EMailServerParameters(JEVisObject mailObj) throws Exception {
         _mailObj = mailObj;
         try {
             setAllEMailParameteres();
         } catch (JEVisException ex) {
-            Logger.getLogger(EMailServerParameters.class.getName()).log(Level.SEVERE, "Failed to get server settings", ex);
+            Logger.getLogger(EMailServerParameters.class.getName()).log(Level.SEVERE, "Failed to get EMail Server settings", ex);
         }
     }
 
@@ -57,10 +56,13 @@ public class EMailServerParameters {
     private void setAllEMailParameteres() throws JEVisException {
         _protocol = setProtocol();
         _host = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.HOST, EMailConstants.Errors.HOST_ERR, null);
-        _port = DBHelper.getAttValue(DBHelper.RetType.INTEGER, _mailObj, EMailConstants.EMail.PORT,EMailConstants.Errors.PORT_ERR, EMailConstants.DefParameters.PORT);
+        _port = DBHelper.getAttValue(DBHelper.RetType.INTEGER, _mailObj, EMailConstants.EMail.PORT, EMailConstants.Errors.PORT_ERR, EMailConstants.DefParameters.PORT);
         _userEMail = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.USER, EMailConstants.Errors.USER_ERR, null);
         _password = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.PASSWORD, EMailConstants.Errors.PASS_ERR, null);
-        _folderName = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.FOLDER, EMailConstants.Errors.FOLD_ERR, EMailConstants.DefParameters.FOLDER_NAME);
+        //POP3 always default folder name - has no Folder parameter in JEConfig
+        if (_protocol.equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {
+            _folderName = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.FOLDER, EMailConstants.Errors.FOLD_ERR, EMailConstants.DefParameters.FOLDER_NAME);
+        }
         _authentication = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.AUTHENTICATION, EMailConstants.Errors.AUTH_ERR, EMailConstants.DefParameters.AUTHENTICATION);
         _ssl = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.SSL, EMailConstants.Errors.SSL_ERR, EMailConstants.DefParameters.SSL);
         _timezone = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.TIMEZONE, EMailConstants.Errors.TIMEZ_ERR, EMailConstants.DefParameters.TIMEZONE);
@@ -81,7 +83,7 @@ public class EMailServerParameters {
             Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "EMail protocol is not received");
             throw new NullPointerException();
         }
-    } 
+    }
 
     /**
      * @return email protocol
@@ -103,14 +105,14 @@ public class EMailServerParameters {
     public String getPassword() {
         return _password;
     }
-    
+
     /**
      * @return host
      */
     public String getHost() {
         return _host;
     }
-    
+
     /**
      * @return port
      */
@@ -124,7 +126,7 @@ public class EMailServerParameters {
     public String getFolderName() {
         return _folderName;
     }
-    
+
     /**
      * @return connection timeout (in seconds)
      */
@@ -138,28 +140,28 @@ public class EMailServerParameters {
     public Integer getReadTimeout() {
         return _readTimeout;
     }
-    
+
     /**
      * @return enabled status
      */
     public Boolean getEnabled() {
         return _enabled;
     }
-    
+
     /**
      * @return time zone
      */
     public String getTimezone() {
         return _timezone;
     }
-    
+
     /**
      * @return SSL type
      */
     public String getSsl() {
         return _ssl;
     }
-    
+
     /**
      * @return authentication type
      */

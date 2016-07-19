@@ -18,7 +18,9 @@ package org.jevis.emaildatasource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -39,9 +41,9 @@ public class EMailManager {
     
 
     public static List<InputStream> getAnswerList(MessageFilter filter, IEMailConnection conn) {
-
+        List<InputStream> input = new ArrayList<>();
+        
         Folder folder = conn.getFolder();
-
         List<Message> messages = getMessageList(folder, filter);
 
         for (Message message : messages) {
@@ -56,6 +58,7 @@ public class EMailManager {
                         String disp = part.getDisposition();
                         if (Part.ATTACHMENT.equalsIgnoreCase(disp) || disp == null) {
                             System.out.println("EMail attach: " + " " + part.getFileName() + " !///! " + part.getContentType());
+                            input.add(part.getInputStream());
                         }
                     }
                 }
@@ -63,7 +66,7 @@ public class EMailManager {
                 Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "could not process the attachment!", ex);
             }
         }
-        return null;
+        return input;
     }
 
     private static List<Message> getMessageList(Folder folder, MessageFilter filter) {

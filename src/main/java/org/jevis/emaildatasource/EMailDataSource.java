@@ -33,22 +33,16 @@ import org.jevis.commons.driver.Importer;
 import org.jevis.commons.driver.ImporterFactory;
 import org.jevis.commons.driver.JEVisImporterAdapter;
 import org.jevis.commons.driver.Parser;
+import org.jevis.commons.driver.ParserFactory;
 import org.jevis.commons.driver.Result;
 
 public class EMailDataSource implements DataSource {
 
-    private Long _id;
-    private String _name; //
     private List<JEVisObject> _channels;
-
-    private Store _store;
-    private Folder _folder;
-
     private JEVisObject _dataSource;
     private Importer _importer;
     private Parser _parser;
     private List<Result> _result;
-
     private EMailServerParameters _eMailServerParameters;
     private IEMailConnection _eMailConnection;
     private MessageFilter _messageFilter;
@@ -63,8 +57,8 @@ public class EMailDataSource implements DataSource {
                 JEVisClass parserJevisClass = channel.getDataSource().getJEVisClass(DataCollectorTypes.Parser.NAME);
                 JEVisObject parser = channel.getChildren(parserJevisClass, true).get(0);
 
-//                _parser = ParserFactory.getParser(parser);
-//                _parser.initialize(parser);
+                _parser = ParserFactory.getParser(parser);
+                _parser.initialize(parser);
                 List<InputStream> input = this.sendSampleRequest(channel);
 
                 if (!input.isEmpty()) {
