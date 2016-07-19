@@ -54,11 +54,13 @@ public class EMailDataSource implements DataSource {
 
             try {
                 _result = new ArrayList<>();
+                
                 JEVisClass parserJevisClass = channel.getDataSource().getJEVisClass(DataCollectorTypes.Parser.NAME);
                 JEVisObject parser = channel.getChildren(parserJevisClass, true).get(0);
-
+                
                 _parser = ParserFactory.getParser(parser);
                 _parser.initialize(parser);
+                
                 List<InputStream> input = this.sendSampleRequest(channel);
 
                 if (!input.isEmpty()) {
