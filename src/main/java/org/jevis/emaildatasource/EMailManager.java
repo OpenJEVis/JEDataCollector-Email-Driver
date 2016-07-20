@@ -1,26 +1,29 @@
-/*
- * Copyright (C) 2016 ai
+/**
+ * Copyright (C) 2013 - 2016 Envidatec GmbH <info@envidatec.com>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This file is part of JEAPI.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * JEAPI is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation in version 3.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * JEAPI is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * JEAPI. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * JEAPI is part of the OpenJEVis project, further project information are
+ * published at <http://www.OpenJEVis.org/>.
  */
+
 package org.jevis.emaildatasource;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -32,17 +35,28 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
+import org.apache.commons.lang.StringUtils;
 
 /**
+ * EMailManager Class is a service that is initiated by the creation and
+ * termination of the connection, as well as the search and returns the required
+ * messages.
  *
- * @author ai
+ * @author Artur Iablokov
  */
 public class EMailManager {
-    
 
-    public static List<InputStream> getAnswerList(MessageFilter filter, IEMailConnection conn) {
+    /**
+     * Get list of attachments
+     *
+     * @param filter
+     * @param conn
+     *
+     * @return List of InputStream
+     */
+    public static List<InputStream> getAnswerList(EMailChannelParameters filter, EMailConnection conn) {
         List<InputStream> input = new ArrayList<>();
-        
+
         Folder folder = conn.getFolder();
         List<Message> messages = getMessageList(folder, filter);
 
@@ -53,11 +67,18 @@ public class EMailManager {
                     // For all multipart contents
                     for (int i = 0; i < multiPart.getCount(); i++) {
                         MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(i);
+
                         // If multipart content is attachment
-                        System.out.println("Name is: " + part.getFileName());
                         String disp = part.getDisposition();
+                        String partName = part.getFileName();
+
+                        if (!Part.ATTACHMENT.equalsIgnoreCase(disp)
+                                && !StringUtils.isNotBlank(partName)) {
+                            continue; // dealing with attachments only
+                        }
+
                         if (Part.ATTACHMENT.equalsIgnoreCase(disp) || disp == null) {
-                            System.out.println("EMail attach: " + " " + part.getFileName() + " !///! " + part.getContentType());
+                            System.out.println("EMail attach: " + " " + partName + " !///! " + part.getContentType());
                             input.add(part.getInputStream());
                         }
                     }
@@ -66,49 +87,75 @@ public class EMailManager {
                 Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "could not process the attachment!", ex);
             }
         }
+
         return input;
     }
 
-    private static List<Message> getMessageList(Folder folder, MessageFilter filter) {
+    /**
+     * Get list of messages
+     *
+     * @param folder
+     * @param conn
+     *
+     * @return List of Message
+     */
+    private static List<Message> getMessageList(Folder folder, EMailChannelParameters chanParam) {
 
         List<Message> messageList = null;
         try {
             folder.open(Folder.READ_ONLY);
-            messageList = Arrays.asList(folder.search(filter.getSearchTerms()));
+            messageList = Arrays.asList(folder.search(chanParam.getSearchTerms()));
         } catch (MessagingException ex) {
             Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "Unable to search for messages", ex);
         }
         return messageList;
     }
 
-    public static IEMailConnection createConnection(EMailServerParameters parameters) {
-        
+    /**
+     * Create special EMail Connection
+     *
+     * @param filter
+     * @param conn
+     *
+     * @return List of InputStream
+     */
+    public static EMailConnection createConnection(EMailServerParameters parameters) {
+
         Properties props = createProperties(parameters);
         Session session = Session.getInstance(props);
-        if (parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {         
-            IEMailConnection conn = new IMAPConnection();
+        if (parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {
+            EMailConnection conn = new IMAPConnection();
             conn.setConnection(session, parameters);
             return conn;
-        }
-        else if(parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)){
+        } else if (parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {
             return null;//new POP3Connection(parameters);
-        }
-        else{
-            Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "EMail Connection failed");
+        } else {
+            Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "EMail Connection failed");
             return null; //!!!!!!!!!!
         }
     }
- 
     
-    public static void terminate(IEMailConnection conn) {
+    /**
+     * Terminate EMail Connection 
+     *
+     * @param conn EMail Connection  
+     */
+    public static void terminate(EMailConnection conn) {
         conn.terminate();
     }
 
+    /**
+     * Create Properties for EMail Connection 
+     *
+     * @param parameters EMail parameters from Frontend
+     *
+     * @return props
+     */
     private static Properties createProperties(EMailServerParameters parameters) {
 
         Properties props = new Properties();
         String key = "mail." + parameters.getProtocol();
-        System.out.println("Key is: "+key);
+        System.out.println("Key is: " + key);
         props.put(key + ".host", parameters.getHost());
         props.put(key + ".port", parameters.getPort());
         props.put(key + ".connectiontimeout", parameters.getConnectionTimeout()); //*1000?ms
@@ -120,7 +167,6 @@ public class EMailManager {
 //        } else if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.STARTTLS)) {
 //            props.put(key + "starttls.enable", true);
 //        }
-
         //_parameters.getAuthentication() usually not used in SSL connections
         props.put("mail.debug", "true");
         props.put("mail.store.protocol", "imaps");

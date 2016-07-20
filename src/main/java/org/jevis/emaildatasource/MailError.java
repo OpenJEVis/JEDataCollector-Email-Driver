@@ -1,25 +1,30 @@
-/*
- * Copyright (C) 2016 bi
+/**
+ * Copyright (C) 2013 - 2016 Envidatec GmbH <info@envidatec.com>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This file is part of JEAPI.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * JEAPI is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation in version 3.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * JEAPI is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * JEAPI. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * JEAPI is part of the OpenJEVis project, further project information are
+ * published at <http://www.OpenJEVis.org/>.
  */
+
 package org.jevis.emaildatasource;
 
 import java.util.logging.Level;
 
 /**
- *
+ *The MailError class
+ * 
  * @author ai
  */
 public class MailError {
@@ -27,7 +32,7 @@ public class MailError {
     private String message;
     private String id;
     private Level level;
-
+    
     public MailError(String message, String id, Level level) {
         this.message = message;
         this.id = id;

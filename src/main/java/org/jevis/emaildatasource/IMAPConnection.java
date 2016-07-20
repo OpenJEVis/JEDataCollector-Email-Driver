@@ -1,19 +1,23 @@
-/*
- * Copyright (C) 2016 ai
+/**
+ * Copyright (C) 2013 - 2016 Envidatec GmbH <info@envidatec.com>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This file is part of JEAPI.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * JEAPI is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation in version 3.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * JEAPI is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * JEAPI. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * JEAPI is part of the OpenJEVis project, further project information are
+ * published at <http://www.OpenJEVis.org/>.
  */
+
 package org.jevis.emaildatasource;
 
 import com.sun.mail.imap.IMAPFolder;
@@ -26,19 +30,19 @@ import javax.mail.Session;
 import javax.mail.Store;
 
 /**
- *
- * @author ai
+ * The IMAPConnection class
+ * 
+ * @author Artur Iablokov
  */
-public class IMAPConnection implements IEMailConnection {
+public class IMAPConnection implements EMailConnection {
 
     private Store _store;
     private IMAPFolder _folder;
     private IMAPSSLStore _sslStore;
     private String _foldName;
 
-    IMAPConnection() {
-    }
 
+    @Override
     public void setConnection(Session session, EMailServerParameters param) {
         try {
             _store = session.getStore();
@@ -68,12 +72,12 @@ public class IMAPConnection implements IEMailConnection {
         try {
             _folder.close(false);
         } catch (MessagingException ex) {
-            Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "Email-Folder terminate failed", ex);
+            Logger.getLogger(IMAPConnection.class.getName()).log(Level.SEVERE, "Email-Folder terminate failed", ex);
         }
         try {
             _store.close();
         } catch (MessagingException ex) {
-            Logger.getLogger(EMailConnection.class.getName()).log(Level.SEVERE, "Email-Store terminate failed", ex);
+            Logger.getLogger(IMAPConnection.class.getName()).log(Level.SEVERE, "Email-Store terminate failed", ex);
         }
     }
 }

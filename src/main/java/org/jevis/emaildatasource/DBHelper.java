@@ -1,6 +1,25 @@
+/**
+ * Copyright (C) 2013 - 2016 Envidatec GmbH <info@envidatec.com>
+ *
+ * This file is part of JEAPI.
+ *
+ * JEAPI is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation in version 3.
+ *
+ * JEAPI is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * JEAPI. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * JEAPI is part of the OpenJEVis project, further project information are
+ * published at <http://www.OpenJEVis.org/>.
+ */
+
 package org.jevis.emaildatasource;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jevis.api.JEVisAttribute;
 import org.jevis.api.JEVisException;
@@ -8,31 +27,16 @@ import org.jevis.api.JEVisObject;
 import org.jevis.api.JEVisSample;
 import org.joda.time.format.DateTimeFormat;
 
-
-/*
- * Copyright (C) 2016 ai
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 /**
+ * The DBHelper class helps to get data from a database or set the default
+ * values.
  *
  * @author Artur Iablokov
  */
 public class DBHelper {
 
     /**
-     * return type
+     * return types
      */
     public static enum RetType {
         STRING, BOOLEAN, INTEGER, DATETIME
@@ -64,11 +68,6 @@ public class DBHelper {
 //                } else {
 //                    throw new NullPointerException(error.getMessage() + " is empty");
 //                }
-            } else {
-                System.out.println("Sample count: " + att.getSampleCount());
-                for (JEVisSample s : att.getAllSamples()) {
-                    System.out.println("s: " + s.getTimestamp() + "=" + s.getValue());
-                }
             }
 
             JEVisSample lastS = att.getLatestSample();
@@ -119,6 +118,11 @@ public class DBHelper {
         }
     }
 
+    /**
+     * Get the default attributes values.
+     *
+     * @return T default
+     */
     private static <T> T getDefValue(T defValue, MailError error) {
         if (defValue != null) {
             return (T) defValue;

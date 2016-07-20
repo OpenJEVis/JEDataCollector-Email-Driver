@@ -22,7 +22,6 @@ package org.jevis.emaildatasource;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import javax.mail.*;
 import org.jevis.api.JEVisObject;
 import org.jevis.commons.driver.DataSource;
 import java.util.logging.Level;
@@ -33,7 +32,6 @@ import org.jevis.commons.driver.Importer;
 import org.jevis.commons.driver.ImporterFactory;
 import org.jevis.commons.driver.JEVisImporterAdapter;
 import org.jevis.commons.driver.Parser;
-import org.jevis.commons.driver.ParserFactory;
 import org.jevis.commons.driver.Result;
 
 public class EMailDataSource implements DataSource {
@@ -44,8 +42,8 @@ public class EMailDataSource implements DataSource {
     private Parser _parser;
     private List<Result> _result;
     private EMailServerParameters _eMailServerParameters;
-    private IEMailConnection _eMailConnection;
-    private MessageFilter _messageFilter;
+    private EMailConnection _eMailConnection;
+    private EMailChannelParameters _channelParameters;
 
     @Override
     public void run() {
@@ -54,13 +52,12 @@ public class EMailDataSource implements DataSource {
 
             try {
                 _result = new ArrayList<>();
-                
+
                 JEVisClass parserJevisClass = channel.getDataSource().getJEVisClass(DataCollectorTypes.Parser.NAME);
                 JEVisObject parser = channel.getChildren(parserJevisClass, true).get(0);
-                
-                _parser = ParserFactory.getParser(parser);
-                _parser.initialize(parser);
-                
+
+//                _parser = ParserFactory.getParser(parser);
+//                _parser.initialize(parser);
                 List<InputStream> input = this.sendSampleRequest(channel);
 
                 if (!input.isEmpty()) {
@@ -94,9 +91,8 @@ public class EMailDataSource implements DataSource {
         List<InputStream> answerList = new ArrayList<>();
 
         _eMailConnection = EMailManager.createConnection(_eMailServerParameters);
-        _messageFilter = new MessageFilter(channel);
-        answerList = EMailManager.getAnswerList(_messageFilter, _eMailConnection);
-        //
+        _channelParameters = new EMailChannelParameters(channel);
+        answerList = EMailManager.getAnswerList(_channelParameters, _eMailConnection);
         EMailManager.terminate(_eMailConnection);
         return answerList;
     }
@@ -119,9 +115,7 @@ public class EMailDataSource implements DataSource {
             Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    
-    
+
     private void initializeChannelObjects(JEVisObject mailObject) {
         try {
             JEVisClass channelDirClass = mailObject.getDataSource().getJEVisClass(EMailConstants.EMailChannelDirectory.NAME);
