@@ -69,7 +69,7 @@ public class EMailDataSource implements DataSource {
                     JEVisImporterAdapter.importResults(_result, _importer, channel);
                 }
             } catch (Exception ex) {
-                java.util.logging.Logger.getLogger(EMailDataSource.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+                java.util.logging.Logger.getLogger(EMailDataSource.class.getName()).log(java.util.logging.Level.SEVERE, "EMail Driver execution can not continue.", ex);
             }
         }
     }
@@ -112,7 +112,7 @@ public class EMailDataSource implements DataSource {
         try {
             _eMailServerParameters = new EMailServerParameters(mailObject);
         } catch (Exception ex) {
-            Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Server settings are incorrect or missing.", ex);
         }
     }
 

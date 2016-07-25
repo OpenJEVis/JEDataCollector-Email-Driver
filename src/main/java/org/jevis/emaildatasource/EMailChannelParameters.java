@@ -17,7 +17,6 @@
  * JEAPI is part of the OpenJEVis project, further project information are
  * published at <http://www.OpenJEVis.org/>.
  */
-
 package org.jevis.emaildatasource;
 
 import java.util.logging.Level;
@@ -56,7 +55,7 @@ public class EMailChannelParameters {
      * Set the channel attributes
      *
      * @param JEVisObject channel
-     * 
+     *
      */
     private void setChannelAttribute(JEVisObject channel) {
 
@@ -67,37 +66,67 @@ public class EMailChannelParameters {
             Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "failed to get attributes for the channel.", ex);
         }
 
-        _sender = DBHelper.getAttValue(DBHelper.RetType.STRING, channel, EMailConstants.EMailChannel.SENDER, EMailConstants.Errors.SEND_ERR, null);
-        _subject = DBHelper.getAttValue(DBHelper.RetType.STRING, channel, EMailConstants.EMailChannel.SUBJECT, EMailConstants.Errors.SUBJ_ERR, null);
-        _lastReadout = DBHelper.getAttValue(DBHelper.RetType.DATETIME, channel, EMailConstants.EMailChannel.LAST_READOUT, EMailConstants.Errors.LASTR_ERR, null);
+        _sender = DBHelper.getAttValue(DBHelper.RetType.STRING, channel, EMailConstants.EMailChannel.SENDER, EMailConstants.Errors.SEND_ERR, EMailConstants.DefParameters.SENDER);
+        _subject = DBHelper.getAttValue(DBHelper.RetType.STRING, channel, EMailConstants.EMailChannel.SUBJECT, EMailConstants.Errors.SUBJ_ERR, EMailConstants.DefParameters.SUBJECT);
+        _lastReadout = DBHelper.getAttValue(DBHelper.RetType.DATETIME, channel, EMailConstants.EMailChannel.LAST_READOUT, EMailConstants.Errors.LASTR_ERR, EMailConstants.DefParameters.LAST_READ);
     }
 
     /**
      * Set the terms for message search
      *
      * @param JEVisObject channel
-     * 
+     *
      */
     private void setSearchTerms(JEVisObject channel) {
 
         setChannelAttribute(channel);
-        SearchTerm newerThan = new ReceivedDateTerm(ComparisonTerm.GT, _lastReadout.toDate());
-        SearchTerm senderTerm = null;
-        try {
-            senderTerm = new FromTerm(new InternetAddress(_sender));
-        } catch (AddressException e) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Email address of the sender is not valid.", e);
-        }
-        SearchTerm subjectTerm = new SubjectTerm(_subject);
-        _searchTerm = new AndTerm(newerThan, new AndTerm(senderTerm, subjectTerm));
 
+        if (_lastReadout != null) {
+            SearchTerm newerThan = null;
+            SearchTerm subjectTerm = null;
+            SearchTerm senderTerm = null;
+            SearchTerm tempTerm = null;
+
+            try {
+                newerThan = new ReceivedDateTerm(ComparisonTerm.GT, _lastReadout.toDate());
+            } catch (NullPointerException ex) {
+                Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "Date term is wrong", ex);
+            }
+
+            if (!_subject.equals("")) {
+                subjectTerm = new SubjectTerm(_subject);
+            }
+
+            if (!_sender.equals("")) {
+                try {
+                    senderTerm = new FromTerm(new InternetAddress(_sender, true));
+                } catch (AddressException ex) {
+                    Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "Sender email address is not valid.", ex);
+                    senderTerm = null;
+                }
+            }
+
+            if (subjectTerm != null && senderTerm != null) {
+                tempTerm = new AndTerm(senderTerm, subjectTerm);
+                _searchTerm = new AndTerm(newerThan, tempTerm);
+            } else if (subjectTerm != null) {
+                tempTerm = subjectTerm;
+                _searchTerm = new AndTerm(newerThan, tempTerm);
+            } else if (senderTerm != null) {
+                tempTerm = senderTerm;
+                _searchTerm = new AndTerm(newerThan, tempTerm);
+            } else {
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Channel parameters are not valid.");
+                _searchTerm = newerThan;
+            }
+        }
     }
-    
+
     /**
      * Get the search term
      *
      * @return SearchTerm
-     * 
+     *
      */
     public SearchTerm getSearchTerms() {
         return _searchTerm;

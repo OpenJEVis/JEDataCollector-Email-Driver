@@ -17,7 +17,6 @@
  * JEAPI is part of the OpenJEVis project, further project information are
  * published at <http://www.OpenJEVis.org/>.
  */
-
 package org.jevis.emaildatasource;
 
 import java.util.logging.Logger;
@@ -25,6 +24,7 @@ import org.jevis.api.JEVisAttribute;
 import org.jevis.api.JEVisException;
 import org.jevis.api.JEVisObject;
 import org.jevis.api.JEVisSample;
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 
 /**
@@ -75,8 +75,9 @@ public class DBHelper {
             switch (rtype) {
                 case STRING:
                     try {
-                        if (lastS.getValueAsString().equals("")) {
-                            Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Warning! {0} has empty string", error.getMessage());
+                        String str = lastS.getValueAsString();
+                        if (null == str || str.isEmpty()) {
+                            Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "{0} is empty. Trying to set the default value", error.getMessage());
                             return getDefValue(defValue, error);
                         } else {
                             return (T) lastS.getValueAsString();
@@ -88,6 +89,7 @@ public class DBHelper {
                 case INTEGER:
                     try {
                         Long longValue = lastS.getValueAsLong();
+                        Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "{0} is empty. Trying to set the default value", error.getMessage());
                         return (T) new Integer(longValue.intValue());
                     } catch (Exception ex) {
                         Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "Attribute {0}: failed to get the value", error.getMessage());
@@ -101,9 +103,20 @@ public class DBHelper {
                         throw new NullPointerException();
                     }
                 case DATETIME:
+                    DateTime datetime = null;
                     try {
                         String value = lastS.getValueAsString();
-                        return (T) DateTimeFormat.forPattern(EMailConstants.ValidValues.TIMEFORMAT).parseDateTime(value);
+                        if (null == value || value.isEmpty()) {
+                            Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "{0} is empty. Trying to set the default value", error.getMessage());
+                            return getDefValue(defValue, error);
+                        }
+                        try {
+                            datetime = DateTimeFormat.forPattern(EMailConstants.ValidValues.TIMEFORMAT).parseDateTime(value);
+                        } catch (Exception ex) {
+                            Logger.getLogger(EMailDataSource.class.getName()).log(error.getLevel(), "the format of the {0} is not valid.", error.getMessage());
+                        }
+                        return (T) datetime;
+
                     } catch (JEVisException ex) {
                         Logger.getLogger(DBHelper.class.getName()).log(error.getLevel(), "Attribute {0}: failed to get the value. ", error.getMessage());
                     }
@@ -127,7 +140,7 @@ public class DBHelper {
         if (defValue != null) {
             return (T) defValue;
         } else {
-            throw new NullPointerException(error.getMessage() + " is empty");
+            throw new NullPointerException(error.getMessage() + " defualt value is wrong");
         }
     }
 }

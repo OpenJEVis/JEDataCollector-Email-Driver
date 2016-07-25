@@ -17,15 +17,15 @@
  * JEAPI is part of the OpenJEVis project, further project information are
  * published at <http://www.OpenJEVis.org/>.
  */
-
 package org.jevis.emaildatasource;
 
 import java.util.logging.Level;
 import org.jevis.commons.driver.DataCollectorTypes;
+import org.joda.time.DateTime;
 
 /**
  * The EMailConstants class is a container for the constants.
- * 
+ *
  * @author Artur Iablokov
  */
 public interface EMailConstants {
@@ -89,14 +89,15 @@ public interface EMailConstants {
         public final static MailError SSL_ERR = new MailError("SSL", "536357", Level.SEVERE);
         public final static MailError TIMEZ_ERR = new MailError("Timezone", "536358", Level.WARNING);
         public final static MailError PORT_ERR = new MailError("Port", "536359", Level.WARNING);
-        public final static MailError ENAB_ERR = new MailError("Enable", "536360", Level.WARNING);
+        public final static MailError ENAB_ERR = new MailError("Enable", "536360", Level.SEVERE);
         public final static MailError SEND_ERR = new MailError("Sender", "536361", Level.SEVERE);
         public final static MailError SUBJ_ERR = new MailError("Subject", "536362", Level.WARNING);
-        public final static MailError LASTR_ERR = new MailError("Last readout", "536363", Level.WARNING);
+        public final static MailError LASTR_ERR = new MailError("Last readout", "536363", Level.SEVERE);
     }
 
     interface DefParameters {
 
+        // EMail server parameters
         public final static String FOLDER_NAME = "INBOX";
         public final static String USER_EMAIL = "";
         public final static String HOST = "";
@@ -108,10 +109,14 @@ public interface EMailConstants {
         public final static int READ_TIMEOUT = 300;
         public final static int CONNECTION_TIMEOUT = 300;
         public final static Boolean ENABLE = false;
+        // EMail Channel parameters
+        public final static String SUBJECT = "";
+        public final static String SENDER = "";
+        public final static DateTime LAST_READ = new DateTime(2010, 1, 1, 0, 0, 0);  //2010-01-01 00:00:00
     }
 
     interface ValidValues {
-        
+
         public final static String TIMEFORMAT = "yyyy-MM-dd HH:mm:ss";
 
         interface CryptProtocols {

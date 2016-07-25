@@ -17,7 +17,6 @@
  * JEAPI is part of the OpenJEVis project, further project information are
  * published at <http://www.OpenJEVis.org/>.
  */
-
 package org.jevis.emaildatasource;
 
 import java.io.IOException;
@@ -35,6 +34,7 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.search.SearchTerm;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -60,31 +60,38 @@ public class EMailManager {
         Folder folder = conn.getFolder();
         List<Message> messages = getMessageList(folder, filter);
 
-        for (Message message : messages) {
-            try {
-                if (message.isMimeType("multipart/*")) {
-                    Multipart multiPart = (Multipart) message.getContent();
-                    // For all multipart contents
-                    for (int i = 0; i < multiPart.getCount(); i++) {
-                        MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(i);
+        if (messages != null) {
 
-                        // If multipart content is attachment
-                        String disp = part.getDisposition();
-                        String partName = part.getFileName();
+            for (Message message : messages) {
+                try {
+                    //test
+                    System.out.println("MESSAGE SUBJECT!!!!!!: " + message.getSubject());
+                    //test end
 
-                        if (!Part.ATTACHMENT.equalsIgnoreCase(disp)
-                                && !StringUtils.isNotBlank(partName)) {
-                            continue; // dealing with attachments only
-                        }
+                    if (message.isMimeType("multipart/*")) {
+                        Multipart multiPart = (Multipart) message.getContent();
+                        // For all multipart contents
+                        for (int i = 0; i < multiPart.getCount(); i++) {
+                            MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(i);
 
-                        if (Part.ATTACHMENT.equalsIgnoreCase(disp) || disp == null) {
-                            System.out.println("EMail attach: " + " " + partName + " !///! " + part.getContentType());
-                            input.add(part.getInputStream());
+                            // If multipart content is attachment
+                            String disp = part.getDisposition();
+                            String partName = part.getFileName();
+
+                            if (!Part.ATTACHMENT.equalsIgnoreCase(disp)
+                                    && !StringUtils.isNotBlank(partName)) {
+                                continue; // dealing with attachments only
+                            }
+
+                            if (Part.ATTACHMENT.equalsIgnoreCase(disp) || disp == null) {
+                                System.out.println("EMail attach: " + " " + partName + " !///! " + part.getContentType());
+                                input.add(part.getInputStream());
+                            }
                         }
                     }
+                } catch (MessagingException | IOException ex) {
+                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "could not process the attachment!", ex);
                 }
-            } catch (MessagingException | IOException ex) {
-                Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "could not process the attachment!", ex);
             }
         }
 
@@ -102,12 +109,28 @@ public class EMailManager {
     private static List<Message> getMessageList(Folder folder, EMailChannelParameters chanParam) {
 
         List<Message> messageList = null;
+
         try {
             folder.open(Folder.READ_ONLY);
-            messageList = Arrays.asList(folder.search(chanParam.getSearchTerms()));
         } catch (MessagingException ex) {
-            Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "Unable to search for messages", ex);
+            Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "EMail folder is not available to read.", ex);
         }
+
+        SearchTerm term = chanParam.getSearchTerms();
+        
+        Message[] msgs = null;
+        try {
+            msgs = folder.search(term);
+        } catch (MessagingException ex) {
+            Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "Unable to search messages", ex);
+        }
+        messageList = Arrays.asList(msgs);
+
+//        try {
+//            messageList = Arrays.asList(folder.search(chanParam.getSearchTerms()));
+//        } catch (MessagingException ex) {
+//            Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "Unable to search messages", ex);
+//        }
         return messageList;
     }
 
@@ -120,32 +143,34 @@ public class EMailManager {
      * @return List of InputStream
      */
     public static EMailConnection createConnection(EMailServerParameters parameters) {
-
+        
+        EMailConnection conn = null;
         Properties props = createProperties(parameters);
         Session session = Session.getInstance(props);
         if (parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {
-            EMailConnection conn = new IMAPConnection();
+            conn = new IMAPConnection();
             conn.setConnection(session, parameters);
-            return conn;
-        } else if (parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {
-            return null;//new POP3Connection(parameters);
+        } else if (parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.POP3)) {
+            conn = new POP3Connection();
+            conn.setConnection(session, parameters);
         } else {
             Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "EMail Connection failed");
-            return null; //!!!!!!!!!!
         }
+        
+        return conn;
     }
-    
+
     /**
-     * Terminate EMail Connection 
+     * Terminate EMail Connection
      *
-     * @param conn EMail Connection  
+     * @param conn EMail Connection
      */
     public static void terminate(EMailConnection conn) {
         conn.terminate();
     }
 
     /**
-     * Create Properties for EMail Connection 
+     * Create Properties for EMail Connection
      *
      * @param parameters EMail parameters from Frontend
      *
