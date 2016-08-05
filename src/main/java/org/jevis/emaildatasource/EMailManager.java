@@ -110,16 +110,16 @@ public class EMailManager {
 
         List<Message> messageList = null;
 
+        SearchTerm term = chanParam.getSearchTerms();
+
+        Message[] msgs = null;
         try {
             folder.open(Folder.READ_ONLY);
         } catch (MessagingException ex) {
             Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "EMail folder is not available to read.", ex);
         }
-
-        SearchTerm term = chanParam.getSearchTerms();
-        
-        Message[] msgs = null;
         try {
+            System.out.println("Folder is open: " + folder.isOpen());
             msgs = folder.search(term);
         } catch (MessagingException ex) {
             Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "Unable to search messages", ex);
@@ -137,13 +137,12 @@ public class EMailManager {
     /**
      * Create special EMail Connection
      *
-     * @param filter
      * @param conn
      *
      * @return List of InputStream
      */
     public static EMailConnection createConnection(EMailServerParameters parameters) {
-        
+
         EMailConnection conn = null;
         Properties props = createProperties(parameters);
         Session session = Session.getInstance(props);
@@ -156,7 +155,6 @@ public class EMailManager {
         } else {
             Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "EMail Connection failed");
         }
-        
         return conn;
     }
 
@@ -178,23 +176,32 @@ public class EMailManager {
      */
     private static Properties createProperties(EMailServerParameters parameters) {
 
+        String str = parameters.getProtocol();
         Properties props = new Properties();
-        String key = "mail." + parameters.getProtocol();
-        System.out.println("Key is: " + key);
-        props.put(key + ".host", parameters.getHost());
-        props.put(key + ".port", parameters.getPort());
-        props.put(key + ".connectiontimeout", parameters.getConnectionTimeout()); //*1000?ms
-        props.put(key + ".timeout", parameters.getReadTimeout());    //*1000?ms
+        String key;
+        String ssl = parameters.getSsl();
+        if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.SSL_TLS)) {
+            //props.put("mail.store.protocol", str + "s");
+            key = "mail." + str + "s";
+            //props.put(key + ".ssl.enable", true);
+        } else {
+            props.put("mail.store.protocol", str);
+            key = "mail." + parameters.getProtocol();
+        }
+        if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.STARTTLS)) {
+            props.put(key + ".starttls.enable", true);
+        }
 
-//        String ssl = parameters.getSsl();
+        props.put(key + ".host", parameters.getHost());
+        props.put(key + ".port", parameters.getPort().toString());
+        props.put(key + ".connectiontimeout", parameters.getConnectionTimeout().toString()); //*1000?ms
+        props.put(key + ".timeout", parameters.getReadTimeout().toString());    //*1000?ms
+
 //        if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.SSL_TLS)) {
 //            props.put(key + ".ssl.enable", true);
-//        } else if (ssl.equals(EMailConstants.ValidValues.CryptProtocols.STARTTLS)) {
-//            props.put(key + "starttls.enable", true);
-//        }
         //_parameters.getAuthentication() usually not used in SSL connections
         props.put("mail.debug", "true");
-        props.put("mail.store.protocol", "imaps");
+//        props.put("mail.store.protocol", "imaps");
         return props;
     }
 }

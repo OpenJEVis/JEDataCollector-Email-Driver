@@ -19,6 +19,8 @@
  */
 package org.jevis.emaildatasource;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import org.jevis.commons.driver.DataCollectorTypes;
 import org.joda.time.DateTime;
@@ -105,7 +107,6 @@ public interface EMailConstants {
         public final static String AUTHENTICATION = "";
         public final static String SSL = "";
         public final static String TIMEZONE = "UTC";
-        public final static int PORT = 143;
         public final static int READ_TIMEOUT = 300;
         public final static int CONNECTION_TIMEOUT = 300;
         public final static Boolean ENABLE = false;
@@ -113,6 +114,11 @@ public interface EMailConstants {
         public final static String SUBJECT = "";
         public final static String SENDER = "";
         public final static DateTime LAST_READ = new DateTime(2010, 1, 1, 0, 0, 0);  //2010-01-01 00:00:00
+        public final static int PORT = -1;
+        
+        
+        
+        
     }
 
     interface ValidValues {

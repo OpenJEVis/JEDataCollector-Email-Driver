@@ -17,9 +17,10 @@
  * JEAPI is part of the OpenJEVis project, further project information are
  * published at <http://www.OpenJEVis.org/>.
  */
-
 package org.jevis.emaildatasource;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jevis.api.JEVisException;
@@ -33,6 +34,17 @@ import org.jevis.api.JEVisObject;
  */
 public class EMailServerParameters {
 
+    private static final Map<String, Integer> portDefMap;
+
+    static {
+        portDefMap = new HashMap<String, Integer>();
+        portDefMap.put("imap", 143);
+        portDefMap.put("imaps", 993);
+        portDefMap.put("pop3", 110);
+        portDefMap.put("pop3s", 995);
+    }
+
+    private final int SECOND = 1000;
     private JEVisObject _mailObj;
     private String _protocol;
     private String _userEMail; //email adress
@@ -46,6 +58,7 @@ public class EMailServerParameters {
     private String _timezone;
     private String _ssl;
     private String _authentication;
+    private boolean _sslEnabled;
 
     public EMailServerParameters(JEVisObject mailObj) throws Exception {
         _mailObj = mailObj;
@@ -62,19 +75,20 @@ public class EMailServerParameters {
     private void setAllEMailParameteres() throws JEVisException {
         _protocol = setProtocol();
         _host = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.HOST, EMailConstants.Errors.HOST_ERR, null);
-        _port = DBHelper.getAttValue(DBHelper.RetType.INTEGER, _mailObj, EMailConstants.EMail.PORT, EMailConstants.Errors.PORT_ERR, EMailConstants.DefParameters.PORT);
         _userEMail = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.USER, EMailConstants.Errors.USER_ERR, null);
         _password = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.PASSWORD, EMailConstants.Errors.PASS_ERR, null);
         //POP3 always default folder name - has no Folder parameter in JEConfig
         if (_protocol.equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {
             _folderName = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.FOLDER, EMailConstants.Errors.FOLD_ERR, EMailConstants.DefParameters.FOLDER_NAME);
         }
-        _authentication = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.AUTHENTICATION, EMailConstants.Errors.AUTH_ERR, EMailConstants.DefParameters.AUTHENTICATION);
         _ssl = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.SSL, EMailConstants.Errors.SSL_ERR, EMailConstants.DefParameters.SSL);
+        _sslEnabled = setIsSsl();
+        _port = setPort();
         _timezone = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.TIMEZONE, EMailConstants.Errors.TIMEZ_ERR, EMailConstants.DefParameters.TIMEZONE);
         _readTimeout = DBHelper.getAttValue(DBHelper.RetType.INTEGER, _mailObj, EMailConstants.EMail.READ_TIMEOUT, EMailConstants.Errors.READ_ERR, EMailConstants.DefParameters.READ_TIMEOUT);
         _connectionTimeout = DBHelper.getAttValue(DBHelper.RetType.INTEGER, _mailObj, EMailConstants.EMail.CONNECTION_TIMEOUT, EMailConstants.Errors.CONN_ERR, EMailConstants.DefParameters.CONNECTION_TIMEOUT);
         _enabled = DBHelper.getAttValue(DBHelper.RetType.BOOLEAN, _mailObj, EMailConstants.EMail.ENABLE, EMailConstants.Errors.ENAB_ERR, EMailConstants.DefParameters.ENABLE);
+        //_authentication = DBHelper.getAttValue(DBHelper.RetType.STRING, _mailObj, EMailConstants.EMail.AUTHENTICATION, EMailConstants.Errors.AUTH_ERR, EMailConstants.DefParameters.AUTHENTICATION);
     }
 
     /**
@@ -89,6 +103,29 @@ public class EMailServerParameters {
             Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "EMail protocol is not received");
             throw new NullPointerException();
         }
+    }
+
+    /**
+     * Sets SSL status.
+     */
+    private boolean setIsSsl() {
+        return _ssl.equals(EMailConstants.ValidValues.CryptProtocols.SSL_TLS);
+    }
+
+    /**
+     * Sets port.
+     */
+    private int setPort() {
+        String key = "";
+        int port = DBHelper.getAttValue(DBHelper.RetType.INTEGER, _mailObj, EMailConstants.EMail.PORT, EMailConstants.Errors.PORT_ERR, EMailConstants.DefParameters.PORT);
+        if (port == EMailConstants.DefParameters.PORT) {
+            if (_sslEnabled) {
+                key = "s";
+            }
+            port = portDefMap.get(_protocol + key);
+        }
+        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "set default value for port: "+port);
+        return port;
     }
 
     /**
@@ -137,14 +174,14 @@ public class EMailServerParameters {
      * @return connection timeout (in seconds)
      */
     public Integer getConnectionTimeout() {
-        return _connectionTimeout;
+        return (_connectionTimeout * SECOND);
     }
 
     /**
      * @return read timeout (in seconds)
      */
     public Integer getReadTimeout() {
-        return _readTimeout;
+        return (_readTimeout * SECOND);
     }
 
     /**
@@ -166,6 +203,13 @@ public class EMailServerParameters {
      */
     public String getSsl() {
         return _ssl;
+    }
+
+    /**
+     * @return SSL status
+     */
+    public boolean isSsl() {
+        return _sslEnabled;
     }
 
     /**

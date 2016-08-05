@@ -17,11 +17,11 @@
  * JEAPI is part of the OpenJEVis project, further project information are
  * published at <http://www.OpenJEVis.org/>.
  */
-
 package org.jevis.emaildatasource;
 
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPSSLStore;
+import com.sun.mail.imap.IMAPStore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Folder;
@@ -31,7 +31,7 @@ import javax.mail.Store;
 
 /**
  * The IMAPConnection class
- * 
+ *
  * @author Artur Iablokov
  */
 public class IMAPConnection implements EMailConnection {
@@ -41,21 +41,25 @@ public class IMAPConnection implements EMailConnection {
     private IMAPSSLStore _sslStore;
     private String _foldName;
 
-
     @Override
     public void setConnection(Session session, EMailServerParameters param) {
+
+        if (param.isSsl()) {
+            _store = new IMAPSSLStore(session, null);
+        } else {
+            _store = new IMAPStore(session, null);
+        }   
+        _foldName = param.getFolderName();
         try {
-            _store = session.getStore();
-            _foldName = param.getFolderName();
             _store.connect(param.getHost(), param.getUserEMail(), param.getPassword());
         } catch (MessagingException ex) {
-            Logger.getLogger(IMAPConnection.class.getName()).log(Level.SEVERE, "EMail Connection setting failed", ex);
+            Logger.getLogger(IMAPConnection.class.getName()).log(Level.SEVERE, "EMail Connection setting failed. Wrong login data or properties.", ex);
         }
 
     }
 
     @Override
-    public Folder getFolder() {
+    public IMAPFolder getFolder() {
         try {
             if (!_store.isConnected()) {
                 org.apache.log4j.Logger.getLogger(this.getClass().getName()).log(org.apache.log4j.Level.ERROR, "Connected not possible");
