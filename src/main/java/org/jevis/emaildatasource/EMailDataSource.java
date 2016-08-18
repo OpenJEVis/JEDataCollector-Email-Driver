@@ -32,6 +32,7 @@ import org.jevis.commons.driver.Importer;
 import org.jevis.commons.driver.ImporterFactory;
 import org.jevis.commons.driver.JEVisImporterAdapter;
 import org.jevis.commons.driver.Parser;
+import org.jevis.commons.driver.ParserFactory;
 import org.jevis.commons.driver.Result;
 
 public class EMailDataSource implements DataSource {
@@ -56,10 +57,17 @@ public class EMailDataSource implements DataSource {
                 JEVisClass parserJevisClass = channel.getDataSource().getJEVisClass(DataCollectorTypes.Parser.NAME);
                 JEVisObject parser = channel.getChildren(parserJevisClass, true).get(0);
 
-//                _parser = ParserFactory.getParser(parser);
-//                _parser.initialize(parser);
+                _parser = ParserFactory.getParser(parser);
+                Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "parser to string: "+_parser.toString());
+                _parser.initialize(parser);
+                Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
                 List<InputStream> input = this.sendSampleRequest(channel);
 
+                //TEST
+                Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Answerlist is empty: " + input.isEmpty());
+                //TEST
+                Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Answerlist is empty: " + input.size());
+                                
                 if (!input.isEmpty()) {
                     _parser.parse(input);
                     _result = _parser.getResult();
@@ -98,8 +106,7 @@ public class EMailDataSource implements DataSource {
     }
 
     @Override
-    public void parse(List<InputStream> input
-    ) {
+    public void parse(List<InputStream> input) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

@@ -20,12 +20,13 @@
 package org.jevis.emaildatasource;
 
 import com.sun.mail.pop3.POP3Folder;
+import com.sun.mail.pop3.POP3SSLStore;
 import com.sun.mail.pop3.POP3Store;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.Session;
+import javax.mail.Store;
 
 /**
  *
@@ -33,31 +34,36 @@ import javax.mail.Session;
  */
 public class POP3Connection implements EMailConnection {
 
-    private POP3Store _store;
+    private static final String DEFAULT_FOLDER = "INBOX";
+    private Store _store;
     private POP3Folder _folder;
-    private Session _session;
+    private POP3SSLStore _sslStore;
     private String _foldName;
 
-    
     @Override
     public void setConnection(Session session, EMailServerParameters param) {
+
+        if (param.isSsl()) {
+            _store = new POP3SSLStore(session, null);
+        } else {
+            _store = new POP3Store(session, null);
+        }   
+        
         try {
-            _store = (POP3Store) session.getStore();
-            _foldName = param.getFolderName();
             _store.connect(param.getHost(), param.getUserEMail(), param.getPassword());
         } catch (MessagingException ex) {
-            Logger.getLogger(IMAPConnection.class.getName()).log(Level.SEVERE, "EMail Connection setting failed", ex);
+            Logger.getLogger(IMAPConnection.class.getName()).log(Level.SEVERE, "EMail Connection setting failed. Wrong login data or properties.", ex);
         }
 
     }
 
     @Override
-    public Folder getFolder() {
+    public POP3Folder getFolder() {
         try {
             if (!_store.isConnected()) {
                 org.apache.log4j.Logger.getLogger(this.getClass().getName()).log(org.apache.log4j.Level.ERROR, "Connected not possible");
             }
-            _folder = (POP3Folder) _store.getFolder(_foldName);
+            _folder = (POP3Folder) _store.getFolder(DEFAULT_FOLDER);
         } catch (MessagingException ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Unable to open the inbox folder", ex);
         }

@@ -19,6 +19,10 @@
  */
 package org.jevis.emaildatasource;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -27,6 +31,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.activation.CommandMap;
+import javax.activation.MailcapCommandMap;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -34,8 +40,11 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import javax.mail.search.SearchTerm;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.plexus.util.FileUtils;
 
 /**
  * EMailManager Class is a service that is initiated by the creation and
@@ -68,29 +77,49 @@ public class EMailManager {
                     System.out.println("MESSAGE SUBJECT!!!!!!: " + message.getSubject());
                     //test end
 
-                    if (message.isMimeType("multipart/*")) {
-                        Multipart multiPart = (Multipart) message.getContent();
-                        // For all multipart contents
-                        for (int i = 0; i < multiPart.getCount(); i++) {
-                            MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(i);
+//                    if (message.getContent() instanceof Multipart)
+                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Content type: " + message.getContentType());
+                    if (message.isMimeType("multipart/*") && !message.isMimeType("multipart/encrypted")) {
 
-                            // If multipart content is attachment
-                            String disp = part.getDisposition();
-                            String partName = part.getFileName();
+                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Message content type" + message.getContentType());
 
-                            if (!Part.ATTACHMENT.equalsIgnoreCase(disp)
-                                    && !StringUtils.isNotBlank(partName)) {
-                                continue; // dealing with attachments only
-                            }
+                        //Message msg = (MimeMessage)message;
+                        Object obj = message.getContent();
+                        System.out.println("Content.class: " + obj.getClass());
+                        if (obj instanceof Multipart) {
+                            Multipart multiPart = (Multipart) message.getContent();
 
-                            if (Part.ATTACHMENT.equalsIgnoreCase(disp) || disp == null) {
-                                System.out.println("EMail attach: " + " " + partName + " !///! " + part.getContentType());
-                                input.add(part.getInputStream());
-                            }
-                        }
+//                        Multipart multiPart = (Multipart) message.getContent();
+                            // For all multipart contents
+                            for (int i = 0; i < multiPart.getCount(); i++) {
+
+                                MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(i);
+                                
+                                String disp = part.getDisposition();
+                                String partName = part.getFileName();
+                                
+                                Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "is Multipart");
+                                // If multipart content is attachment
+                                if (!Part.ATTACHMENT.equalsIgnoreCase(disp)
+                                        && !StringUtils.isNotBlank(partName)) {
+                                    continue; // dealing with attachments only
+                                }
+
+                                if (Part.ATTACHMENT.equalsIgnoreCase(disp) || disp == null) {
+                                    byte[] bytes = IOUtils.toByteArray(part.getInputStream());
+                                    InputStream inputStream = new ByteArrayInputStream(bytes);
+                                    InputStream answer = new BufferedInputStream(inputStream);
+                                    input.add(answer);
+                                }
+
+                            } //for multipart check
+                        } //instance
+                    } else {
+                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Mimetype of message is not a multipart/*");
                     }
+
                 } catch (MessagingException | IOException ex) {
-                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "could not process the attachment!", ex);
+                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Could not process the attachment!", ex);
                 }
             }
         }
