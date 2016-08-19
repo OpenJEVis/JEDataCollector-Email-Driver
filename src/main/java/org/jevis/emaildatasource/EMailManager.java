@@ -33,12 +33,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
+import javax.mail.FetchProfile;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
+import javax.mail.UIDFolder;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.search.SearchTerm;
@@ -94,10 +96,10 @@ public class EMailManager {
                             for (int i = 0; i < multiPart.getCount(); i++) {
 
                                 MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(i);
-                                
+
                                 String disp = part.getDisposition();
                                 String partName = part.getFileName();
-                                
+
                                 Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "is Multipart");
                                 // If multipart content is attachment
                                 if (!Part.ATTACHMENT.equalsIgnoreCase(disp)
@@ -148,11 +150,12 @@ public class EMailManager {
             Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "EMail folder is not available to read.", ex);
         }
         try {
-            System.out.println("Folder is open: " + folder.isOpen());
+            Logger.getLogger(EMailManager.class.getName()).log(Level.INFO, "Folder is open: {0}", folder.isOpen());
             msgs = folder.search(term);
         } catch (MessagingException ex) {
             Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "Unable to search messages", ex);
         }
+        Logger.getLogger(EMailManager.class.getName()).log(Level.INFO, "Messages found: {0}", msgs.length);
         messageList = Arrays.asList(msgs);
 
 //        try {

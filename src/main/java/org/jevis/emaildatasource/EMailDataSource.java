@@ -58,13 +58,13 @@ public class EMailDataSource implements DataSource {
                 JEVisObject parser = channel.getChildren(parserJevisClass, true).get(0);
 
                 _parser = ParserFactory.getParser(parser);
-                Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "parser to string: "+_parser.toString());
+                Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "parser to string: {0}", _parser.toString());
                 _parser.initialize(parser);
                 Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
                 List<InputStream> input = this.sendSampleRequest(channel);
 
                 //TEST
-                Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Answerlist is empty: " + input.isEmpty());
+                Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Answerlist is empty: {0}", input.isEmpty());
                 //TEST
                 Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Answerlist is empty: " + input.size());
                                 
@@ -99,7 +99,7 @@ public class EMailDataSource implements DataSource {
         List<InputStream> answerList = new ArrayList<>();
 
         _eMailConnection = EMailManager.createConnection(_eMailServerParameters);
-        _channelParameters = new EMailChannelParameters(channel);
+        _channelParameters = new EMailChannelParameters(channel, _eMailServerParameters.getProtocol());
         answerList = EMailManager.getAnswerList(_channelParameters, _eMailConnection);
         EMailManager.terminate(_eMailConnection);
         return answerList;

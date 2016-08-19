@@ -34,7 +34,7 @@ import javax.mail.Store;
  */
 public class POP3Connection implements EMailConnection {
 
-    private static final String DEFAULT_FOLDER = "INBOX";
+    private static final String DEFAULT_FOLDER = "Inbox";
     private Store _store;
     private POP3Folder _folder;
     private POP3SSLStore _sslStore;

@@ -46,8 +46,10 @@ public class EMailChannelParameters {
     private String _subject;
     private DateTime _lastReadout;
     private SearchTerm _searchTerm;
+    private String _protokol;
 
-    public EMailChannelParameters(JEVisObject channel) {
+    public EMailChannelParameters(JEVisObject channel, String protokol) {
+        _protokol = protokol;
         setSearchTerms(channel);
     }
 
@@ -105,19 +107,22 @@ public class EMailChannelParameters {
                     senderTerm = null;
                 }
             }
-
-            if (subjectTerm != null && senderTerm != null) {
-                tempTerm = new AndTerm(senderTerm, subjectTerm);
-                _searchTerm = new AndTerm(newerThan, tempTerm);
-            } else if (subjectTerm != null) {
-                tempTerm = subjectTerm;
-                _searchTerm = new AndTerm(newerThan, tempTerm);
-            } else if (senderTerm != null) {
-                tempTerm = senderTerm;
-                _searchTerm = new AndTerm(newerThan, tempTerm);
-            } else {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Channel parameters are not valid.");
-                _searchTerm = newerThan;
+            if (_protokol.equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {
+                if (subjectTerm != null && senderTerm != null) {
+                    tempTerm = new AndTerm(senderTerm, subjectTerm);
+                    _searchTerm = new AndTerm(newerThan, tempTerm);
+                } else if (subjectTerm != null) {
+                    tempTerm = subjectTerm;
+                    _searchTerm = new AndTerm(newerThan, tempTerm);
+                } else if (senderTerm != null) {
+                    tempTerm = senderTerm;
+                    _searchTerm = new AndTerm(newerThan, tempTerm);
+                } else {
+                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Channel parameters are not valid.");
+                    _searchTerm = newerThan;
+                }
+            } else if (_protokol.equalsIgnoreCase(EMailConstants.Protocol.POP3)){
+                _searchTerm = subjectTerm;
             }
         }
     }
