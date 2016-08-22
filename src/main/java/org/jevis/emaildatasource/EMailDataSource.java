@@ -50,9 +50,7 @@ public class EMailDataSource implements DataSource {
     public void run() {
 
         for (JEVisObject channel : _channels) {
-            //mess
-            final long timeStart = System.currentTimeMillis();
-            //
+
             try {
                 _result = new ArrayList<>();
 
@@ -62,21 +60,14 @@ public class EMailDataSource implements DataSource {
                 _parser = ParserFactory.getParser(parser);
                 Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "parser to string: {0}", _parser.toString());
                 _parser.initialize(parser);
-//                //measurment
-//                final long timeAfterInit = System.currentTimeMillis();
-//                Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Execution time for channel " + channel.getName() + ". Init done in: " + (timeAfterInit - timeStart) + " Millisek.");
-//                //
-
                 Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
                 List<InputStream> input = this.sendSampleRequest(channel);
-//                //measurment
-//                final long timeSendReques = System.currentTimeMillis();
-//                Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Execution time for channel " + channel.getName() + ". Response received in: " + (timeSendReques - timeStart) + " Millisek.");
-//                //
 
+                //TEST
                 Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Answerlist is empty: {0}", input.isEmpty());
-                Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Answerlist size: " + input.size());
-
+                //TEST
+                Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Answerlist is empty: " + input.size());
+                                
                 if (!input.isEmpty()) {
                     _parser.parse(input);
                     _result = _parser.getResult();
@@ -88,8 +79,6 @@ public class EMailDataSource implements DataSource {
             } catch (Exception ex) {
                 java.util.logging.Logger.getLogger(EMailDataSource.class.getName()).log(java.util.logging.Level.SEVERE, "EMail Driver execution can not continue.", ex);
             }
-            final long timeEnd = System.currentTimeMillis();
-            Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Execution time for channel " + channel.getName() + " is: " + (timeEnd - timeStart) + " Millisek.");
         }
     }
 
@@ -108,27 +97,11 @@ public class EMailDataSource implements DataSource {
     @Override
     public List<InputStream> sendSampleRequest(JEVisObject channel) {
         List<InputStream> answerList = new ArrayList<>();
-        final long start = System.currentTimeMillis();
+
         _eMailConnection = EMailManager.createConnection(_eMailServerParameters);
-        //measurment
-        final long connectDone = System.currentTimeMillis();
-        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Send sample request. Connection parameters and connection: " + (connectDone - start) + " Millisek.");
-        //
         _channelParameters = new EMailChannelParameters(channel, _eMailServerParameters.getProtocol());
-        //measurment
-        final long channelDone = System.currentTimeMillis();
-        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Send sample request. Channel parameters: " + (channelDone - start) + " Millisek.");
-        //
         answerList = EMailManager.getAnswerList(_channelParameters, _eMailConnection);
-        //measurment
-        final long answerDone = System.currentTimeMillis();
-        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Send sample request. Answer list: " + (answerDone - start) + " Millisek.");
-        //
         EMailManager.terminate(_eMailConnection);
-        //measurment
-        final long timeTotalSendreq = System.currentTimeMillis();
-        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Send sample request. Time Total: " + (timeTotalSendreq - start) + " Millisek.");
-        //
         return answerList;
     }
 
