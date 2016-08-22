@@ -46,11 +46,12 @@ public class EMailChannelParameters {
     private String _subject;
     private DateTime _lastReadout;
     private SearchTerm _searchTerm;
-    private String _protokol;
+    private final String _protocol;
 
-    public EMailChannelParameters(JEVisObject channel, String protokol) {
-        _protokol = protokol;
-        setSearchTerms(channel);
+    public EMailChannelParameters(JEVisObject channel, String protocol) {
+        _protocol = protocol;
+        setChannelAttribute(channel);
+        setSearchTerms();
     }
 
     /**
@@ -79,52 +80,83 @@ public class EMailChannelParameters {
      * @param JEVisObject channel
      *
      */
-    private void setSearchTerms(JEVisObject channel) {
-
-        setChannelAttribute(channel);
+    private void setSearchTerms() {
 
         if (_lastReadout != null) {
-            SearchTerm newerThan = null;
-            SearchTerm subjectTerm = null;
-            SearchTerm senderTerm = null;
-            SearchTerm tempTerm = null;
-
-            try {
-                newerThan = new ReceivedDateTerm(ComparisonTerm.GT, _lastReadout.toDate());
-            } catch (NullPointerException ex) {
-                Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "Date term is wrong", ex);
+            if (_protocol.equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {
+                _searchTerm = termBuilderIMAP();
+            } else if (_protocol.equalsIgnoreCase(EMailConstants.Protocol.POP3)) {
+                _searchTerm = termBuilder();
+            } else {
+                Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "Failed to set up the Search Term");
             }
 
-            if (!_subject.equals("")) {
-                subjectTerm = new SubjectTerm(_subject);
-            }
-
-            if (!_sender.equals("")) {
-                try {
-                    senderTerm = new FromTerm(new InternetAddress(_sender, true));
-                } catch (AddressException ex) {
-                    Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "Sender email address is not valid.", ex);
-                    senderTerm = null;
-                }
-            }
-            if (_protokol.equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {
-                if (subjectTerm != null && senderTerm != null) {
-                    tempTerm = new AndTerm(senderTerm, subjectTerm);
-                    _searchTerm = new AndTerm(newerThan, tempTerm);
-                } else if (subjectTerm != null) {
-                    tempTerm = subjectTerm;
-                    _searchTerm = new AndTerm(newerThan, tempTerm);
-                } else if (senderTerm != null) {
-                    tempTerm = senderTerm;
-                    _searchTerm = new AndTerm(newerThan, tempTerm);
-                } else {
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Channel parameters are not valid.");
-                    _searchTerm = newerThan;
-                }
-            } else if (_protokol.equalsIgnoreCase(EMailConstants.Protocol.POP3)){
-                _searchTerm = subjectTerm;
-            }
+        } else {
+            Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "Last readout date is not valid. Enter the correct value, or leave the field empty.");
         }
+
+//        if (_lastReadout != null) {
+//            SearchTerm newerThan = null;
+//            SearchTerm subjectTerm = null;
+//            SearchTerm senderTerm = null;
+//            SearchTerm tempTerm = null;
+//
+//            try {
+//                newerThan = new ReceivedDateTerm(ComparisonTerm.GT, _lastReadout.toDate());
+//            } catch (NullPointerException ex) {
+//                Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "Date term is wrong", ex);
+//            }
+//
+//            if (!_subject.equals("")) {
+//                subjectTerm = new SubjectTerm(_subject);
+//            }
+//
+//            if (!_sender.equals("")) {
+//                try {
+//                    senderTerm = new FromTerm(new InternetAddress(_sender, true));
+//                } catch (AddressException ex) {
+//                    Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "Sender email address is not valid.", ex);
+//                    senderTerm = null;
+//                }
+//            }
+//            if (_protocol.equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {
+//                if (subjectTerm != null && senderTerm != null) {
+//                    tempTerm = new AndTerm(senderTerm, subjectTerm);
+//                    _searchTerm = new AndTerm(newerThan, tempTerm);
+//                } else if (subjectTerm != null) {
+//                    tempTerm = subjectTerm;
+//                    _searchTerm = new AndTerm(newerThan, tempTerm);
+//                } else if (senderTerm != null) {
+//                    tempTerm = senderTerm;
+//                    _searchTerm = new AndTerm(newerThan, tempTerm);
+//                } else {
+//                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Channel parameters are not valid.");
+//                    _searchTerm = newerThan;
+//                }
+//            } else if (_protocol.equalsIgnoreCase(EMailConstants.Protocol.POP3)) {
+//                _searchTerm = subjectTerm;
+//            }
+//        }
+    }
+
+    /**
+     * Get the search term
+     *
+     * @return EMail protocol
+     *
+     */
+    public String getProtocol() {
+        return _protocol;
+    }
+
+    /**
+     * Get the search term
+     *
+     * @return DateTime last Readout
+     *
+     */
+    public DateTime getLastReadout() {
+        return _lastReadout;
     }
 
     /**
@@ -135,5 +167,83 @@ public class EMailChannelParameters {
      */
     public SearchTerm getSearchTerms() {
         return _searchTerm;
+    }
+
+    /**
+     * Set the subject search term
+     *
+     * @return SearchTerm
+     *
+     */
+    private SearchTerm setSubjectTerm() {
+        SearchTerm term = null;
+        term = new SubjectTerm(_subject);
+        return term;
+    }
+
+    /**
+     * Set the sender search term
+     *
+     * @return SearchTerm
+     *
+     */
+    private SearchTerm setSenderTerm() {
+        SearchTerm term = null;
+        try {
+            term = new FromTerm(new InternetAddress(_sender, true));
+        } catch (AddressException ex) {
+            Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "Sender email address is not valid.", ex);
+            term = null;
+        }
+        return term;
+    }
+
+    private SearchTerm termBuilder() {
+        SearchTerm temp = null;
+        SearchTerm from;
+        SearchTerm subj;
+
+        //both parameters are specified.
+        if (!_sender.equals("") && !_subject.equals("")) {
+            from = setSenderTerm();
+            subj = setSubjectTerm();
+            //EMail address valid
+            if (from != null) {
+                temp = new AndTerm(from, subj);
+            } else {
+                temp = subj;
+            }
+        } else if (!_sender.equals("")) {
+            //EMail address not valid
+            from = setSenderTerm();
+            if (from == null) {
+                Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "Sender parameter is not valid. Check your EMail Channel");
+            }
+        } else if (!_subject.equals("")) {
+            temp = setSubjectTerm();
+        } else {
+            Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "EMail channel does not contain parameters. Specify the EMail subject and EMail sender");
+        }
+        return temp;
+    }
+
+    private SearchTerm termBuilderIMAP() {
+        SearchTerm temp = termBuilder();
+        SearchTerm newerThan = null;
+        SearchTerm term;
+        try {
+            newerThan = new ReceivedDateTerm(ComparisonTerm.GT, _lastReadout.toDate());
+        } catch (NullPointerException ex) {
+            Logger.getLogger(EMailChannelParameters.class.getName()).log(Level.SEVERE, "Date term is wrong", ex);
+        }
+        
+        // subject and sender not null
+        if (temp != null) {
+            term = new AndTerm(newerThan, temp);
+        } else {
+            term = newerThan;
+        }
+
+        return term;
     }
 }

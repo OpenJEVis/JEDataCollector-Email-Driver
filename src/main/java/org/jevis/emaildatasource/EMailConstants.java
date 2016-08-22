@@ -110,15 +110,11 @@ public interface EMailConstants {
         public final static int READ_TIMEOUT = 300;
         public final static int CONNECTION_TIMEOUT = 300;
         public final static Boolean ENABLE = false;
+        public final static int PORT = -1;
         // EMail Channel parameters
         public final static String SUBJECT = "";
         public final static String SENDER = "";
-        public final static DateTime LAST_READ = new DateTime(2010, 1, 1, 0, 0, 0);  //2010-01-01 00:00:00
-        public final static int PORT = -1;
-        
-        
-        
-        
+        public final static DateTime LAST_READ = new DateTime(2010, 1, 1, 0, 0, 0);  //2010-01-01 00:00:00        
     }
 
     interface ValidValues {
