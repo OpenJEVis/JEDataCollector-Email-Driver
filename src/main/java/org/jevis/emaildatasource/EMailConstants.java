@@ -71,6 +71,8 @@ public interface EMailConstants {
         public final static String LAST_READOUT = "Last Readout";
         public final static String SUBJECT = "Subject";
         public final static String SENDER = "Sender";
+        public final static String INBODY = "";
+        public final static String FILENAME = "Filename";
     }
 
     interface Protocol {
@@ -92,9 +94,11 @@ public interface EMailConstants {
         public final static MailError TIMEZ_ERR = new MailError("Timezone", "536358", Level.WARNING);
         public final static MailError PORT_ERR = new MailError("Port", "536359", Level.WARNING);
         public final static MailError ENAB_ERR = new MailError("Enable", "536360", Level.SEVERE);
-        public final static MailError SEND_ERR = new MailError("Sender", "536361", Level.SEVERE);
+        public final static MailError SEND_ERR = new MailError("Sender", "536361", Level.WARNING);
         public final static MailError SUBJ_ERR = new MailError("Subject", "536362", Level.WARNING);
         public final static MailError LASTR_ERR = new MailError("Last readout", "536363", Level.SEVERE);
+        public final static MailError FILENAME_ERR = new MailError("File name", "536364", Level.WARNING);
+        public final static MailError BODY_ERR = new MailError("Parse body", "536365", Level.SEVERE);
     }
 
     interface DefParameters {
@@ -110,15 +114,13 @@ public interface EMailConstants {
         public final static int READ_TIMEOUT = 300;
         public final static int CONNECTION_TIMEOUT = 300;
         public final static Boolean ENABLE = false;
+        public final static int PORT = -1;
         // EMail Channel parameters
         public final static String SUBJECT = "";
         public final static String SENDER = "";
-        public final static DateTime LAST_READ = new DateTime(2010, 1, 1, 0, 0, 0);  //2010-01-01 00:00:00
-        public final static int PORT = -1;
-        
-        
-        
-        
+        public final static DateTime LAST_READ = new DateTime(2010, 1, 1, 0, 0, 0);  //2010-01-01 00:00:00        
+        public final static Boolean INBODY = false;
+        public final static String FILENAME = "";
     }
 
     interface ValidValues {
