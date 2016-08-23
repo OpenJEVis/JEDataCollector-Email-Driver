@@ -68,7 +68,6 @@
                             <artifactSet>
                                 <includes>
                                     <include>javax.mail:mail</include>
-                                    <include>javax.activation:activation</include>
                                 </includes>
                             </artifactSet>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
