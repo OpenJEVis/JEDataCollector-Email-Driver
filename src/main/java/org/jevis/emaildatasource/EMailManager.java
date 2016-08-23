@@ -19,6 +19,7 @@
  */
 package org.jevis.emaildatasource;
 
+import com.sun.xml.internal.bind.v2.TODO;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -64,25 +65,12 @@ public class EMailManager {
         Folder folder = conn.getFolder();
         List<Message> messages = getMessageList(folder, filter);
 
-        if (messages != null) {
-            for (Message message : messages) {
-                try {
-                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Content type: " + message.getContentType());
-                    if (message.isMimeType("multipart/*") && !message.isMimeType("multipart/encrypted")) {
-                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Message content type" + message.getContentType());
-                        //Message msg = (MimeMessage)message;
-                        Object obj = message.getContent();
-                        if (obj instanceof Multipart) {
-                            input = prepareAnswer(message, filter.getFilename());
-                        } //instanceof
-                    } else {
-                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Mimetype of message is not a multipart/*");
-                    }
-                } catch (MessagingException | IOException ex) {
-                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Could not process the attachment!", ex);
-                }
-            }
+        if (filter.getDataInBody()) {
+            input = getAnswerListFromBody(messages);
+        } else {
+            input = getAnswerListFromAttach(messages, filter.getFilename());
         }
+
         return input;
     }
 
@@ -260,4 +248,64 @@ public class EMailManager {
         return answer;
     }
 
+    private static List<InputStream> getAnswerListFromAttach(List<Message> messages, String filename) {
+        List<InputStream> input = new ArrayList<>();
+        if (messages != null) {
+            for (Message message : messages) {
+                try {
+                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Content type: " + message.getContentType());
+                    if (message.isMimeType("multipart/*") && !message.isMimeType("multipart/encrypted")) {
+                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Message content type" + message.getContentType());
+                        //Message msg = (MimeMessage)message;
+                        Object obj = message.getContent();
+                        if (obj instanceof Multipart) {
+                            input = prepareAnswer(message, filename);
+                        } //instanceof
+
+                    } else {
+                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Mimetype of message is not a multipart/*");
+
+                    }
+                } catch (MessagingException | IOException ex) {
+                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Could not process the attachment!", ex);
+                }
+            }
+        }
+        return input;
+    }
+
+    private static List<InputStream> getAnswerListFromBody(List<Message> messages) {
+        List<InputStream> input = new ArrayList<>();
+        if (messages != null) {
+            for (Message message : messages) {
+
+                try {
+                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Content type: " + message.getContentType());
+                    if (message.isMimeType("text/plain")) {
+                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Message content type" + message.getContentType());
+                        //Message msg = (MimeMessage)message;
+                        String content = (String) message.getContent();
+                        if (content.equals("") && content != null) {
+                            //TODO;//input = prepareAnswer(message);
+                        } //instanceof
+
+                    } else if (message.isMimeType("message/rfc822")) {
+
+                    } else if (message.isMimeType("multipart/*")) {
+                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Message content type" + message.getContentType());
+                        //Message msg = (MimeMessage)message;
+                        Object obj = message.getContent();
+                        if (obj instanceof Multipart) {
+                        }
+                    } else {
+                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Mimetype of message is not a multipart/*");
+                    }
+                } //try
+                catch (MessagingException | IOException ex) {
+                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Could not process the attachment!", ex);
+                }
+            }
+        }
+        return input;
+    }
 }

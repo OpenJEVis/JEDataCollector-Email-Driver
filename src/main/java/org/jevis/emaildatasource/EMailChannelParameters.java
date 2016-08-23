@@ -75,7 +75,7 @@ public class EMailChannelParameters {
         _subject = DBHelper.getAttValue(DBHelper.RetType.STRING, channel, EMailConstants.EMailChannel.SUBJECT, EMailConstants.Errors.SUBJ_ERR, EMailConstants.DefParameters.SUBJECT);
         _lastReadout = DBHelper.getAttValue(DBHelper.RetType.DATETIME, channel, EMailConstants.EMailChannel.LAST_READOUT, EMailConstants.Errors.LASTR_ERR, EMailConstants.DefParameters.LAST_READ);
         _filename = DBHelper.getAttValue(DBHelper.RetType.STRING, channel, EMailConstants.EMailChannel.FILENAME, EMailConstants.Errors.FILENAME_ERR, EMailConstants.DefParameters.FILENAME);
-        //_inbody = DBHelper.getAttValue(DBHelper.RetType.BOOLEAN, channel, _sender, EMailConstants.Errors.BODY_ERR, EMailConstants.DefParameters.INBODY);
+        _inbody = DBHelper.getAttValue(DBHelper.RetType.BOOLEAN, channel, EMailConstants.EMailChannel.INBODY, EMailConstants.Errors.BODY_ERR, EMailConstants.DefParameters.INBODY);
     }
 
     /**
@@ -182,7 +182,16 @@ public class EMailChannelParameters {
     public SearchTerm getSearchTerms() {
         return _searchTerm;
     }
-
+    
+    /**
+     * Get the data in body parameter
+     *
+     * @return boolean
+     *
+     */
+    public boolean getDataInBody() {
+        return _inbody;
+    }
     /**
      * Set the subject search term
      *

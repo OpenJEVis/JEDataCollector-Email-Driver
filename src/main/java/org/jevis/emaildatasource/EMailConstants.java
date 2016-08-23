@@ -71,7 +71,7 @@ public interface EMailConstants {
         public final static String LAST_READOUT = "Last Readout";
         public final static String SUBJECT = "Subject";
         public final static String SENDER = "Sender";
-        public final static String INBODY = "";
+        public final static String INBODY = "Data in body";
         public final static String FILENAME = "Filename";
     }
 
