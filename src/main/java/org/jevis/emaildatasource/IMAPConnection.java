@@ -24,9 +24,11 @@ import com.sun.mail.imap.IMAPSSLStore;
 import com.sun.mail.imap.IMAPStore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
+import static jdk.nashorn.internal.codegen.OptimisticTypesPersistence.store;
 
 /**
  * The IMAPConnection class
@@ -47,7 +49,7 @@ public class IMAPConnection implements EMailConnection {
             _store = new IMAPSSLStore(session, null);
         } else {
             _store = new IMAPStore(session, null);
-        }   
+        }
         _foldName = param.getFolderName();
         try {
             _store.connect(param.getHost(), param.getUserEMail(), param.getPassword());
@@ -64,6 +66,16 @@ public class IMAPConnection implements EMailConnection {
                 org.apache.log4j.Logger.getLogger(this.getClass().getName()).log(org.apache.log4j.Level.ERROR, "Connected not possible");
             }
             _folder = (IMAPFolder) _store.getFolder(_foldName);
+            if (_folder == null) {
+                Folder[] f = _store.getDefaultFolder().list();
+
+                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "A list of available folders: ");
+                for (Folder fd : f) {
+                    System.out.println(">> " + fd.getName());
+                }
+
+            }
+
         } catch (MessagingException ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Unable to open the inbox folder", ex);
         }

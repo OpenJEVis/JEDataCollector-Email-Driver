@@ -88,7 +88,11 @@ public class EMailDataSource implements DataSource {
                     } catch (NullPointerException np) {
                         Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE,"File is wrong or parse failed");
                     }
+                    
+                    DBHelper.setLastReadout(_result, channel);        
                 }
+                
+                
             } catch (Exception ex) {
                 java.util.logging.Logger.getLogger(EMailDataSource.class.getName()).log(java.util.logging.Level.SEVERE, "EMail Driver execution can not continue.", ex);
             }
@@ -124,10 +128,7 @@ public class EMailDataSource implements DataSource {
         Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Send sample request. Channel parameters: " + (channelDone - start) + " Millisek.");
         //
         answerList = EMailManager.getAnswerList(_channelParameters, _eMailConnection);
-        //measurment
-        final long answerDone = System.currentTimeMillis();
-        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Send sample request. Answer list: " + (answerDone - start) + " Millisek.");
-        //
+        
         EMailManager.terminate(_eMailConnection);
         //measurment
         final long timeTotalSendreq = System.currentTimeMillis();

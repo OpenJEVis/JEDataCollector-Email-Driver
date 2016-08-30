@@ -19,7 +19,6 @@
  */
 package org.jevis.emaildatasource;
 
-import com.sun.xml.internal.bind.v2.TODO;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -63,7 +62,10 @@ public class EMailManager {
     public static List<InputStream> getAnswerList(EMailChannelParameters filter, EMailConnection conn) {
         List<InputStream> input = new ArrayList<>();
         Folder folder = conn.getFolder();
+        final long start = System.currentTimeMillis();
         List<Message> messages = getMessageList(folder, filter);
+        final long answerDone = System.currentTimeMillis();
+        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, ">>Get message list: " + (answerDone - start) + " Millisek.");
 
         if (filter.getDataInBody()) {
             input = getAnswerListFromBody(messages);
@@ -93,15 +95,22 @@ public class EMailManager {
             Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "EMail folder is not available to read.", ex);
         }
         Message[] msgs = null;
-        Logger.getLogger(EMailManager.class.getName()).log(Level.INFO, "Folder is open: {0}", folder.isOpen());
-        if (chanParam.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {
+
+        Logger.getLogger(EMailManager.class
+                .getName()
+        ).log(Level.INFO, "Folder is open: {0}", folder.isOpen());
+        if (chanParam.getProtocol()
+                .equalsIgnoreCase(EMailConstants.Protocol.IMAP)) {
             try {
                 msgs = folder.search(term);
             } catch (MessagingException ex) {
                 Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "Unable to search messages", ex);
             }
-        } else if (chanParam.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.POP3)) {
+        } else if (chanParam.getProtocol()
+                .equalsIgnoreCase(EMailConstants.Protocol.POP3)) {
             try {
+//                int[] msgnums = new int[1000];
+//                Message[] messages = folder.getMessages(msgnums);
                 Message[] messages = folder.getMessages();
                 messages = filterPOP3ByDate(messages, chanParam.getLastReadout());
                 msgs = folder.search(term, messages);
@@ -113,7 +122,10 @@ public class EMailManager {
         }
 
         messageList = Arrays.asList(msgs);
-        Logger.getLogger(EMailManager.class.getName()).log(Level.INFO, "Messages found: {0}", messageList.size());
+
+        Logger.getLogger(EMailManager.class
+                .getName()
+        ).log(Level.INFO, "Messages found: {0}", messageList.size());
 
         return messageList;
     }
@@ -136,8 +148,10 @@ public class EMailManager {
         } else if (parameters.getProtocol().equalsIgnoreCase(EMailConstants.Protocol.POP3)) {
             conn = new POP3Connection();
             conn.setConnection(session, parameters);
+
         } else {
-            Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "EMail Connection failed");
+            Logger.getLogger(EMailManager.class
+                    .getName()).log(Level.SEVERE, "EMail Connection failed");
         }
         return conn;
     }
@@ -201,17 +215,27 @@ public class EMailManager {
             String disp = part.getDisposition();
             String partName = part.getFileName();
 
-            Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "is Multipart");
+            Logger
+                    .getLogger(EMailDataSource.class
+                            .getName()).log(Level.INFO, "is Multipart");
             // If multipart content is attachment
             if (!Part.ATTACHMENT.equalsIgnoreCase(disp)
                     && !StringUtils.isNotBlank(partName)) {
                 continue; // dealing with attachments only
+
             }
 
             if (Part.ATTACHMENT.equalsIgnoreCase(disp) || disp == null) {
                 if (StringUtils.containsIgnoreCase(part.getFileName(), filename)) {
-                    Logger.getLogger(EMailManager.class.getName()).log(Level.INFO, "Attach found: {0}", part.getFileName());
+                    Logger.getLogger(EMailManager.class
+                            .getName()).log(Level.INFO, "Attach found: {0}", part.getFileName());
+                    final long start = System.currentTimeMillis();
                     input.add(toInputStream(part));//add attach to answerlist
+                    final long answerDone = System.currentTimeMillis();
+                    Logger
+                            .getLogger(EMailDataSource.class
+                                    .getName()).log(Level.INFO, ">>Attach to inputstream: " + (answerDone - start) + " Millisek.");
+
                 }
             }
         } //for multipart check
@@ -225,13 +249,17 @@ public class EMailManager {
             try {
                 if (message.getSentDate().after(date)) {
                     msg.add(message);
+
                 }
             } catch (MessagingException ex) {
-                Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "POP3: failed to filter messages by date.", ex);
+                Logger.getLogger(EMailManager.class
+                        .getName()).log(Level.SEVERE, "POP3: failed to filter messages by date.", ex);
             }
         }
         int size = msg.size();
-        Logger.getLogger(EMailManager.class.getName()).log(Level.INFO, "POP3: messages after filtering by date: {0}", size);
+        Logger
+                .getLogger(EMailManager.class
+                        .getName()).log(Level.INFO, "POP3: messages after filtering by date: {0}", size);
         Message[] msgArray = new Message[size];
         return msg.toArray(msgArray);
     }
@@ -240,34 +268,44 @@ public class EMailManager {
         byte[] bytes = null;
         try {
             bytes = IOUtils.toByteArray(part.getInputStream());
+
         } catch (IOException | MessagingException ex) {
-            Logger.getLogger(EMailManager.class.getName()).log(Level.SEVERE, "Unable to pack a file in inputstream", ex);
+            Logger.getLogger(EMailManager.class
+                    .getName()).log(Level.SEVERE, "Unable to pack a file in inputstream", ex);
         }
-        InputStream inputStream = new ByteArrayInputStream(bytes);
-        InputStream answer = new BufferedInputStream(inputStream);
+        InputStream answer = new ByteArrayInputStream(bytes);
+//        InputStream inputStream = new ByteArrayInputStream(bytes);
+        //InputStream answer = new BufferedInputStream(inputStream);
         return answer;
     }
 
     private static List<InputStream> getAnswerListFromAttach(List<Message> messages, String filename) {
         List<InputStream> input = new ArrayList<>();
+
         if (messages != null) {
             for (Message message : messages) {
                 try {
-                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Content type: " + message.getContentType());
+                    Logger.getLogger(EMailDataSource.class
+                            .getName()).log(Level.INFO, "Content type: " + message.getContentType());
+
                     if (message.isMimeType("multipart/*") && !message.isMimeType("multipart/encrypted")) {
-                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Message content type" + message.getContentType());
+                        Logger.getLogger(EMailDataSource.class
+                                .getName()).log(Level.INFO, "Message content type" + message.getContentType());
                         //Message msg = (MimeMessage)message;
                         Object obj = message.getContent();
                         if (obj instanceof Multipart) {
                             input = prepareAnswer(message, filename);
+
                         } //instanceof
 
                     } else {
-                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Mimetype of message is not a multipart/*");
+                        Logger.getLogger(EMailDataSource.class
+                                .getName()).log(Level.INFO, "Mimetype of message is not a multipart/*");
 
                     }
                 } catch (MessagingException | IOException ex) {
-                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Could not process the attachment!", ex);
+                    Logger.getLogger(EMailDataSource.class
+                            .getName()).log(Level.SEVERE, "Could not process the attachment!", ex);
                 }
             }
         }
@@ -276,33 +314,45 @@ public class EMailManager {
 
     private static List<InputStream> getAnswerListFromBody(List<Message> messages) {
         List<InputStream> input = new ArrayList<>();
+
         if (messages != null) {
             for (Message message : messages) {
 
                 try {
-                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Content type: " + message.getContentType());
+                    Logger.getLogger(EMailDataSource.class
+                            .getName()).log(Level.INFO, "Content type: " + message.getContentType());
+
                     if (message.isMimeType("text/plain")) {
-                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Message content type" + message.getContentType());
+                        Logger.getLogger(EMailDataSource.class
+                                .getName()).log(Level.INFO, "Message content type: " + message.getContentType());
                         //Message msg = (MimeMessage)message;
                         String content = (String) message.getContent();
+
                         if (content.equals("") && content != null) {
                             //TODO;//input = prepareAnswer(message);
                         } //instanceof
 
                     } else if (message.isMimeType("message/rfc822")) {
+                        Logger.getLogger(EMailDataSource.class
+                                .getName()).log(Level.INFO, "Message content type: " + message.getContentType());
 
                     } else if (message.isMimeType("multipart/*")) {
-                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Message content type" + message.getContentType());
+                        Logger.getLogger(EMailDataSource.class
+                                .getName()).log(Level.INFO, "Message content type" + message.getContentType());
                         //Message msg = (MimeMessage)message;
                         Object obj = message.getContent();
+
                         if (obj instanceof Multipart) {
                         }
                     } else {
-                        Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Mimetype of message is not a multipart/*");
+                        Logger.getLogger(EMailDataSource.class
+                                .getName()).log(Level.INFO, "");
+
                     }
                 } //try
                 catch (MessagingException | IOException ex) {
-                    Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Could not process the attachment!", ex);
+                    Logger.getLogger(EMailDataSource.class
+                            .getName()).log(Level.SEVERE, "Could not process the attachment!", ex);
                 }
             }
         }

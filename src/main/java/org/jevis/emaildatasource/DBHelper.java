@@ -19,11 +19,14 @@
  */
 package org.jevis.emaildatasource;
 
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jevis.api.JEVisAttribute;
 import org.jevis.api.JEVisException;
 import org.jevis.api.JEVisObject;
 import org.jevis.api.JEVisSample;
+import org.jevis.commons.driver.Result;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 
@@ -142,5 +145,22 @@ public class DBHelper {
         } else {
             throw new NullPointerException(error.getMessage() + " defualt value is wrong");
         }
+    }
+
+    static void setLastReadout(List<Result> results, JEVisObject channel) {
+        DateTime timestamp = new org.joda.time.DateTime();
+
+        try {
+            JEVisAttribute lastReadout = channel.getAttribute(EMailConstants.EMailChannel.LAST_READOUT);
+            JEVisSample sample = lastReadout.getLatestSample();
+
+            String lts = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(timestamp);
+            lastReadout.buildSample(new DateTime(), lts).commit();
+            Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Set LastReadout to: " + timestamp.toString());
+
+        } catch (Exception ex) {
+            Logger.getLogger(EMailDataSource.class.getName()).log(Level.SEVERE, "Error while setting lastReadout");
+        }
+
     }
 }
