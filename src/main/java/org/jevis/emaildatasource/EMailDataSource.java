@@ -34,6 +34,7 @@ import org.jevis.commons.driver.JEVisImporterAdapter;
 import org.jevis.commons.driver.Parser;
 import org.jevis.commons.driver.ParserFactory;
 import org.jevis.commons.driver.Result;
+import org.joda.time.DateTimeZone;
 
 public class EMailDataSource implements DataSource {
 
@@ -78,7 +79,7 @@ public class EMailDataSource implements DataSource {
                 Logger.getLogger(EMailDataSource.class.getName()).log(Level.INFO, "Answerlist size: " + input.size());
 
                 if (!input.isEmpty()) {
-                    _parser.parse(input);
+                    _parser.parse(input, DateTimeZone.forID(_eMailServerParameters.getTimezone()));
                     _result = _parser.getResult();
                 }
 
